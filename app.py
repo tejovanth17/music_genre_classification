@@ -28,61 +28,91 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('app.log'),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
-app.secret_key = 'symphony-ai-music-genre-secret-key'
+app.secret_key = os.environ.get('SECRET_KEY', 'symphony-ai-music-genre-secret-key')
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
 
 ALLOWED_EXTENSIONS = {'wav', 'mp3', 'flac', 'm4a', 'ogg'}
 
+# Ensure necessary static directories exist
+os.makedirs('static/spectrograms', exist_ok=True)
+os.makedirs('static/waveforms', exist_ok=True)
+
 # Global model state
-model = None
-model_input_shape = None
-recommender = None
+_global_model = None
+_global_model_input_shape = None
+_global_recommender = None
+
+
+def get_model():
+    """Returns the loaded Keras model, initializing it if necessary."""
+    global _global_model, _global_model_input_shape
+    if _global_model is None:
+        load_and_validate_model()
+    return _global_model
 
 
 def get_recommender():
     """Lazily initializes and returns the music recommendation engine"""
-    global recommender
-    if recommender is None:
+    global _global_recommender
+    if _global_recommender is None:
         try:
-            recommender = MusicRecommender()
-            recommender.fit()
+            _global_recommender = MusicRecommender()
+            _global_recommender.fit()
             logger.info("Music Recommender engine initialized.")
         except Exception as e:
             logger.warning(f"Recommender initialization notice: {e}")
-    return recommender
+    return _global_recommender
 
 
 def load_and_validate_model():
     """Load deep learning model and validate architecture"""
-    global model, model_input_shape
+    global _global_model, _global_model_input_shape
     try:
-        model_path = Path('models/Trained_model.h5')
-        if not model_path.exists():
-            logger.error(f"Model file not found at {model_path}")
+        # Search for model path relative to app root
+        model_paths = [
+            Path('models/Trained_model.h5'),
+            Path(__file__).resolve().parent / 'models' / 'Trained_model.h5'
+        ]
+        
+        target_path = None
+        for p in model_paths:
+            if p.exists():
+                target_path = p
+                break
+                
+        if not target_path:
+            logger.error(f"Model file not found at any of {[str(p) for p in model_paths]}")
             return False
             
-        model = load_model(str(model_path))
-        model_input_shape = model.input_shape
+        logger.info(f"Loading model from {target_path}...")
+        _global_model = load_model(str(target_path))
+        _global_model_input_shape = _global_model.input_shape
         
-        logger.info(f"Model loaded successfully! Input shape: {model_input_shape}, Output shape: {model.output_shape}")
+        logger.info(f"Model loaded successfully! Input shape: {_global_model_input_shape}, Output shape: {_global_model.output_shape}")
         
         # Test model with dummy data
-        test_input_shape = model_input_shape[1:]
+        test_input_shape = _global_model_input_shape[1:]
         dummy_input = np.random.random((1,) + test_input_shape)
-        test_prediction = model.predict(dummy_input, verbose=0)
+        test_prediction = _global_model.predict(dummy_input, verbose=0)
         logger.info(f"Test prediction verification completed. Outputs: {test_prediction.shape[-1]}")
         return True
     except Exception as e:
         logger.error(f"Error loading model: {e}")
         logger.error(traceback.format_exc())
         return False
+
+
+# Eager warmup on module import for Gunicorn workers
+try:
+    load_and_validate_model()
+except Exception as e:
+    logger.warning(f"Eager model warmup warning: {e}")
 
 
 def allowed_file(filename):
@@ -98,84 +128,104 @@ def preprocess_audio(file_path):
         if len(y) == 0:
             raise ValueError("Empty audio file")
             
-        # Extract Mel spectrogram
+        # Compute 128-band Mel Spectrogram
         mel_spec = librosa.feature.melspectrogram(
-            y=y, sr=sr, n_mels=128, n_fft=2048, hop_length=512, fmax=8000
+            y=y, 
+            sr=sr, 
+            n_fft=2048, 
+            hop_length=512, 
+            n_mels=128
         )
         mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
         
-        # Z-score standardization
-        mel_spec_mean = np.mean(mel_spec_db)
-        mel_spec_std = np.std(mel_spec_db)
-        if mel_spec_std == 0:
-            mel_spec_std = 1e-8
-            
-        mel_spec_norm = (mel_spec_db - mel_spec_mean) / mel_spec_std
+        # Generate clean spectrogram image matrix for CNN tensor
+        fig = plt.figure(figsize=(2.56, 2.56), dpi=100)
+        ax = fig.add_subplot(111)
+        ax.axes.get_xaxis().set_visible(False)
+        ax.axes.get_yaxis().set_visible(False)
+        ax.set_frame_on(False)
         
-        # Determine target shape
-        target_height = model_input_shape[1] if model_input_shape else 210
-        target_width = model_input_shape[2] if model_input_shape else 210
+        librosa.display.specshow(mel_spec_db, sr=sr, hop_length=512, x_axis='time', y_axis='mel')
         
-        if mel_spec_norm.shape != (target_height, target_width):
-            from scipy.ndimage import zoom
-            height_scale = target_height / mel_spec_norm.shape[0]
-            width_scale = target_width / mel_spec_norm.shape[1]
-            mel_spec_resized = zoom(mel_spec_norm, (height_scale, width_scale), order=1)
-        else:
-            mel_spec_resized = mel_spec_norm
+        temp_img = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        temp_img_path = temp_img.name
+        temp_img.close()
+        
+        plt.savefig(temp_img_path, bbox_inches='tight', pad_inches=0, transparent=True)
+        plt.close(fig)
+        
+        # Load and resize for model input shape (210, 210, 1)
+        img = tf.keras.preprocessing.image.load_img(
+            temp_img_path, 
+            target_size=(210, 210), 
+            color_mode='grayscale'
+        )
+        img_array = tf.keras.preprocessing.image.img_to_array(img)
+        img_array = img_array / 255.0  # Normalize to [0, 1]
+        img_tensor = np.expand_dims(img_array, axis=0)  # Shape: (1, 210, 210, 1)
+        
+        try:
+            os.unlink(temp_img_path)
+        except Exception:
+            pass
             
-        if len(model_input_shape) == 4:
-            mel_spec_final = mel_spec_resized.reshape(1, target_height, target_width, 1)
-        else:
-            mel_spec_final = mel_spec_resized.reshape(1, target_height, target_width)
-            
-        return mel_spec_final, mel_spec_db, y, sr
+        return img_tensor, mel_spec_db, y, sr
+        
     except Exception as e:
-        logger.error(f"Error in preprocessing: {e}")
+        logger.error(f"Error in preprocess_audio: {e}")
         logger.error(traceback.format_exc())
         return None, None, None, None
 
 
 def generate_visualizations(y, sr, mel_spec_db, session_id):
-    """Generates multi-panel spectrogram, waveform, and spectral feature plots"""
+    """Generates audio waveforms and Mel-Spectrogram plots for UI presentation"""
     try:
-        os.makedirs('static/spectrograms', exist_ok=True)
-        fig, axes = plt.subplots(3, 1, figsize=(12, 10))
+        fig, axes = plt.subplots(3, 1, figsize=(10, 7), facecolor='#0f172a')
         
         # 1. Waveform
-        librosa.display.waveshow(y, sr=sr, ax=axes[0], color='#6366f1', alpha=0.85)
-        axes[0].set_title('Audio Amplitude Waveform', fontsize=12, fontweight='bold')
-        axes[0].set_ylabel('Amplitude')
-        axes[0].grid(True, alpha=0.3)
+        time_axis = np.linspace(0, len(y) / sr, len(y))
+        axes[0].plot(time_axis, y, color='#38bdf8', linewidth=0.7)
+        axes[0].set_title('Raw Audio Waveform Amplitude', color='#f8fafc', fontsize=11, fontweight='bold', pad=8)
+        axes[0].set_facecolor('#0b0f19')
+        axes[0].tick_params(colors='#94a3b8')
+        for spine in axes[0].spines.values():
+            spine.set_color('#334155')
         
-        # 2. Mel-Spectrogram
-        img1 = librosa.display.specshow(
-            mel_spec_db, sr=sr, x_axis='time', y_axis='mel', fmax=8000, ax=axes[1], cmap='viridis'
+        # 2. Mel-Spectrogram (dB)
+        img = librosa.display.specshow(
+            mel_spec_db, sr=sr, hop_length=512, x_axis='time', y_axis='mel', 
+            ax=axes[1], cmap='magma'
         )
-        axes[1].set_title('Mel-Frequency Spectrogram (Energy dB)', fontsize=12, fontweight='bold')
-        plt.colorbar(img1, ax=axes[1], format='%+2.0f dB')
+        axes[1].set_title('128-Band Mel-Frequency Spectrogram (dB)', color='#f8fafc', fontsize=11, fontweight='bold', pad=8)
+        axes[1].tick_params(colors='#94a3b8')
+        for spine in axes[1].spines.values():
+            spine.set_color('#334155')
         
         # 3. Spectral Centroid
-        spectral_centroids = librosa.feature.spectral_centroid(y=y, sr=sr)[0]
-        frames = range(len(spectral_centroids))
-        t = librosa.frames_to_time(frames, sr=sr)
-        axes[2].plot(t, spectral_centroids, color='#ec4899', alpha=0.9, linewidth=1.5)
-        axes[2].set_title('Spectral Centroid (Brightness Trajectory)', fontsize=12, fontweight='bold')
-        axes[2].set_xlabel('Time (seconds)')
-        axes[2].set_ylabel('Frequency (Hz)')
-        axes[2].grid(True, alpha=0.3)
+        centroids = librosa.feature.spectral_centroid(y=y, sr=sr, hop_length=512)[0]
+        frames = range(len(centroids))
+        t = librosa.frames_to_time(frames, sr=sr, hop_length=512)
+        axes[2].plot(t, centroids, color='#a855f7', linewidth=1.5, label='Spectral Centroid (Brightness)')
+        axes[2].set_title('Spectral Centroid Trajectory', color='#f8fafc', fontsize=11, fontweight='bold', pad=8)
+        axes[2].set_facecolor('#0b0f19')
+        axes[2].tick_params(colors='#94a3b8')
+        axes[2].set_xlabel('Time (s)', color='#94a3b8')
+        for spine in axes[2].spines.values():
+            spine.set_color('#334155')
         
         plt.tight_layout()
-        spectrogram_path = f'static/spectrograms/{session_id}_analysis.png'
-        plt.savefig(spectrogram_path, dpi=120, bbox_inches='tight', facecolor='#ffffff')
+        
+        spec_filename = f"spec_{session_id}.png"
+        spec_path = Path('static/spectrograms') / spec_filename
+        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight', dpi=120)
         plt.close(fig)
-        return spectrogram_path
+        
+        return f"spectrograms/{spec_filename}"
+        
     except Exception as e:
         logger.error(f"Error generating visualizations: {e}")
         return None
 
-
-# --- Web Routes ---
 
 @app.route('/')
 def index():
@@ -190,12 +240,13 @@ def upload_page():
 @app.route('/model-info')
 def model_info():
     """Returns metadata about the active deep learning model"""
-    if model is None:
-        return jsonify({'error': 'Model not loaded'})
+    active_model = get_model()
+    if active_model is None:
+        return jsonify({'error': 'Model not loaded', 'status': 'unavailable'})
     return jsonify({
-        'input_shape': str(model.input_shape),
-        'output_shape': str(model.output_shape),
-        'number_of_parameters': model.count_params(),
+        'input_shape': str(active_model.input_shape),
+        'output_shape': str(active_model.output_shape),
+        'number_of_parameters': active_model.count_params(),
         'genres': GENRES,
         'number_of_genres': len(GENRES),
         'status': 'active'
@@ -213,6 +264,11 @@ def serve_audio(filename):
 @app.route('/predict-sample/<sample_name>')
 def predict_sample(sample_name):
     """1-Click prediction handler for GTZAN benchmark samples"""
+    active_model = get_model()
+    if active_model is None:
+        flash("Model is initializing. Please try again in a moment.")
+        return redirect(url_for('upload_page'))
+        
     dataset_dir = resolve_dataset_dir()
     # Find the audio file inside genres_original
     matching_files = list((dataset_dir / 'genres_original').glob(f"**/{sample_name}"))
@@ -231,7 +287,7 @@ def predict_sample(sample_name):
             return redirect(url_for('upload_page'))
             
         visualization_path = generate_visualizations(y, sr, mel_spec_db, session_id)
-        prediction = model.predict(processed_audio, verbose=0)
+        prediction = active_model.predict(processed_audio, verbose=0)
         
         if not np.allclose(np.sum(prediction), 1.0, atol=0.1):
             prediction = tf.nn.softmax(prediction).numpy()
@@ -277,8 +333,9 @@ def predict_sample(sample_name):
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if model is None:
-        flash('Model not loaded. Please check the model file.')
+    active_model = get_model()
+    if active_model is None:
+        flash('Model is loading or unavailable. Please check the model file.')
         return redirect(url_for('upload_page'))
     
     # Check if sample preset was chosen
@@ -299,23 +356,25 @@ def predict():
         filename = secure_filename(file.filename)
         session_id = str(uuid.uuid4())
         
-        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_file:
-            file.save(tmp_file.name)
-            temp_path = tmp_file.name
+        temp_dir = tempfile.gettempdir()
+        temp_path = os.path.join(temp_dir, f"{session_id}_{filename}")
         
         try:
+            file.save(temp_path)
             processed_audio, mel_spec_db, y, sr = preprocess_audio(temp_path)
+            
             if processed_audio is None:
-                flash('Error processing audio file. Please check format.')
-                os.unlink(temp_path)
+                flash('Error preprocessing audio file. Please ensure it is a valid, uncorrupted audio track.')
                 return redirect(url_for('upload_page'))
                 
             visualization_path = generate_visualizations(y, sr, mel_spec_db, session_id)
-            prediction = model.predict(processed_audio, verbose=0)
+            
+            # Predict
+            prediction = active_model.predict(processed_audio, verbose=0)
             
             if not np.allclose(np.sum(prediction), 1.0, atol=0.1):
                 prediction = tf.nn.softmax(prediction).numpy()
-            
+                
             predicted_index = np.argmax(prediction)
             predicted_genre = GENRES[predicted_index]
             confidence = float(prediction[0][predicted_index]) * 100
@@ -326,21 +385,21 @@ def predict():
             ]
             all_predictions.sort(key=lambda x: x['confidence'], reverse=True)
             
-            # Recommendations
+            # AI Recommendations
             rec_engine = get_recommender()
             recommendations = []
-            if rec_engine and rec_engine.is_fitted:
+            if rec_engine:
                 try:
-                    # Pick sample from top predicted genre
-                    candidate_songs = rec_engine.list_available_songs(genre=predicted_genre, limit=1)
-                    if candidate_songs:
-                        recs_df = rec_engine.recommend(candidate_songs[0], top_n=3)
-                        recommendations = recs_df.to_dict(orient='records')
+                    recs_df = rec_engine.recommend(filename, top_n=3)
+                    recommendations = recs_df.to_dict(orient='records')
                 except Exception as e:
-                    logger.warning(f"Recommender notice: {e}")
+                    logger.warning(f"Recommender query note: {e}")
                     
-            os.unlink(temp_path)
-            
+            try:
+                os.unlink(temp_path)
+            except Exception:
+                pass
+                
             return render_template(
                 'result.html',
                 predicted_genre=predicted_genre,
@@ -349,54 +408,57 @@ def predict():
                 filename=filename,
                 visualization_path=visualization_path,
                 session_id=session_id,
-                recommendations=recommendations,
-                audio_url=None
+                recommendations=recommendations
             )
+            
         except Exception as e:
-            logger.error(f"Error in prediction: {e}")
+            logger.error(f"Prediction pipeline error: {e}")
             logger.error(traceback.format_exc())
-            flash(f"Error processing audio: {str(e)}")
             try:
                 os.unlink(temp_path)
             except Exception:
                 pass
+            flash(f"Error processing audio track: {str(e)}")
             return redirect(url_for('upload_page'))
+            
     else:
-        flash('Invalid file type. Please upload WAV, MP3, FLAC, M4A, or OGG.')
+        flash('Invalid file format. Allowed formats: .WAV, .MP3, .FLAC, .OGG, .M4A')
         return redirect(url_for('upload_page'))
 
 
 @app.route('/api/predict', methods=['POST'])
 def api_predict():
-    """Headless JSON REST API for audio prediction"""
-    if model is None:
+    """REST API Endpoint for programmatic audio classification"""
+    active_model = get_model()
+    if active_model is None:
         return jsonify({'error': 'Model not loaded'}), 500
+        
     if 'file' not in request.files:
-        return jsonify({'error': 'No file provided'}), 400
+        return jsonify({'error': 'No file uploaded'}), 400
         
     file = request.files['file']
-    if not allowed_file(file.filename):
-        return jsonify({'error': 'Invalid file type'}), 400
+    if file.filename == '' or not allowed_file(file.filename):
+        return jsonify({'error': 'Invalid file format'}), 400
         
-    with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_file:
-        file.save(tmp_file.name)
-        temp_path = tmp_file.name
-        
+    temp_dir = tempfile.gettempdir()
+    temp_path = os.path.join(temp_dir, f"{uuid.uuid4()}_{secure_filename(file.filename)}")
+    
     try:
+        file.save(temp_path)
         processed_audio, _, _, _ = preprocess_audio(temp_path)
+        os.unlink(temp_path)
+        
         if processed_audio is None:
-            return jsonify({'error': 'Error processing audio'}), 400
+            return jsonify({'error': 'Failed to process audio spectrum'}), 400
             
-        prediction = model.predict(processed_audio, verbose=0)
-        if not np.allclose(np.sum(prediction), 1.0, atol=0.1):
-            prediction = tf.nn.softmax(prediction).numpy()
-            
+        prediction = active_model.predict(processed_audio, verbose=0)
         predicted_index = np.argmax(prediction)
         predicted_genre = GENRES[predicted_index]
-        confidence = float(prediction[0][predicted_index])
+        confidence = float(prediction[0][predicted_index]) * 100
         
-        os.unlink(temp_path)
         return jsonify({
+            'success': True,
+            'filename': file.filename,
             'predicted_genre': predicted_genre,
             'confidence': confidence,
             'all_predictions': {GENRES[i]: float(prediction[0][i]) for i in range(len(GENRES))},
@@ -411,14 +473,7 @@ def api_predict():
 
 
 if __name__ == '__main__':
-    logger.info("Starting Flask application...")
-    if not load_and_validate_model():
-        logger.error("Failed to load model. Exiting.")
-        exit(1)
-        
-    os.makedirs('static/spectrograms', exist_ok=True)
-    get_recommender()
-    
+    logger.info("Starting Flask development server...")
     host = os.environ.get('HOST', '0.0.0.0')
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('FLASK_DEBUG', 'False').lower() in ['true', '1', 't']
