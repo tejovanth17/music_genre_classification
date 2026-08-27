@@ -1,0 +1,7 @@
+# Deep Learning, Computer Vision & Benchmark Training Dependencies (Local / GPU)
+tensorflow>=2.15.0
+torch>=2.0.0
+torchvision>=0.15.0
+ultralytics>=8.0.0
+xgboost>=2.0.0
+seaborn>=0.13.0
