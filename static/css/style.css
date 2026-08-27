@@ -1,59 +1,71 @@
 /* ==========================================================================
-   SYMPHONY AI - PRODUCTION ENTERPRISE DESIGN SYSTEM
-   Professional Solid Dark Palette (Slate / Royal Blue / Semantic Tokens)
+   SYMPHONY AI - ENTERPRISE PRODUCTION DESIGN SYSTEM
+   Supports Solid Production Light Mode (Default) & Dark Mode
    ========================================================================== */
 
-:root {
-    /* Base Solid Surfaces */
-    --bg-base: #0B0F19;
-    --bg-surface: #111827;
-    --bg-surface-elevated: #1F2937;
-    --bg-surface-hover: #374151;
-    --bg-input: #111827;
+:root, [data-theme="light"] {
+    /* Base Solid Light Surfaces */
+    --bg-base: #F8FAFC;
+    --bg-surface: #FFFFFF;
+    --bg-surface-elevated: #F1F5F9;
+    --bg-surface-hover: #E2E8F0;
+    --bg-input: #FFFFFF;
     
     /* Core Brand Tokens */
     --primary: #2563EB;
     --primary-hover: #1D4ED8;
     --primary-active: #1E40AF;
-    --primary-light: rgba(37, 99, 235, 0.15);
+    --primary-light: rgba(37, 99, 235, 0.08);
     
     /* Semantic Production Colors */
-    --success: #10B981;
-    --success-bg: rgba(16, 185, 129, 0.12);
-    --success-border: #059669;
+    --success: #059669;
+    --success-bg: #ECFDF5;
+    --success-border: #A7F3D0;
     
-    --warning: #F59E0B;
-    --warning-bg: rgba(245, 158, 11, 0.12);
-    --warning-border: #D97706;
+    --warning: #D97706;
+    --warning-bg: #FFFBEB;
+    --warning-border: #FDE68A;
     
-    --danger: #EF4444;
-    --danger-bg: rgba(239, 68, 68, 0.12);
-    --danger-border: #DC2626;
+    --danger: #DC2626;
+    --danger-bg: #FEF2F2;
+    --danger-border: #FECACA;
     
-    --info: #0EA5E9;
-    --info-bg: rgba(14, 165, 233, 0.12);
-    --info-border: #0284C7;
+    --info: #0284C7;
+    --info-bg: #F0F9FF;
+    --info-border: #BAE6FD;
     
-    --indigo: #6366F1;
-    --violet: #8B5CF6;
+    --indigo: #4F46E5;
+    --violet: #7C3AED;
     
     /* Typography & Neutral Scale */
-    --text-primary: #F9FAFB;
-    --text-secondary: #E5E7EB;
-    --text-muted: #9CA3AF;
-    --text-dim: #6B7280;
+    --text-primary: #0F172A;
+    --text-secondary: #334155;
+    --text-muted: #64748B;
+    --text-dim: #94A3B8;
     
     /* Borders & Dividers */
-    --border-subtle: #1F2937;
-    --border-default: #374151;
-    --border-highlight: #4B5563;
-    --border-focus: #3B82F6;
+    --border-subtle: #F1F5F9;
+    --border-default: #E2E8F0;
+    --border-highlight: #CBD5E1;
+    --border-focus: #2563EB;
     
     /* Shadows */
     --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.08);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    
+    /* Genre Badges (Light Theme) */
+    --badge-blues-bg: #DBEAFE;     --badge-blues-text: #1E40AF;     --badge-blues-border: #93C5FD;
+    --badge-classical-bg: #FEF3C7; --badge-classical-text: #92400E; --badge-classical-border: #FCD34D;
+    --badge-country-bg: #FFEDD5;   --badge-country-text: #9A3412;   --badge-country-border: #FDBA74;
+    --badge-disco-bg: #FCE7F3;     --badge-disco-text: #9D174D;     --badge-disco-border: #F9A8D4;
+    --badge-hiphop-bg: #F3E8FF;    --badge-hiphop-text: #6B21A8;    --badge-hiphop-border: #D8B4FE;
+    --badge-jazz-bg: #CCFBF1;      --badge-jazz-text: #115E59;      --badge-jazz-border: #5EEAD4;
+    --badge-metal-bg: #FEE2E2;     --badge-metal-text: #991B1B;     --badge-metal-border: #FCA5A5;
+    --badge-pop-bg: #FFE4E6;       --badge-pop-text: #9F1239;       --badge-pop-border: #FDA4AF;
+    --badge-reggae-bg: #DCFCE7;    --badge-reggae-text: #166534;    --badge-reggae-border: #86EFAC;
+    --badge-rock-bg: #EDE9FE;      --badge-rock-text: #5B21B6;      --badge-rock-border: #C4B5FD;
     
     /* Layout Constants */
     --radius-sm: 6px;
@@ -63,7 +75,62 @@
     --transition: 0.18s ease-in-out;
 }
 
-/* Base Reset & Setup */
+/* Dark Theme Overrides */
+[data-theme="dark"] {
+    --bg-base: #0B0F19;
+    --bg-surface: #111827;
+    --bg-surface-elevated: #1F2937;
+    --bg-surface-hover: #374151;
+    --bg-input: #111827;
+    
+    --primary: #3B82F6;
+    --primary-hover: #2563EB;
+    --primary-active: #1D4ED8;
+    --primary-light: rgba(59, 130, 246, 0.15);
+    
+    --success: #10B981;
+    --success-bg: rgba(16, 185, 129, 0.15);
+    --success-border: #059669;
+    
+    --warning: #F59E0B;
+    --warning-bg: rgba(245, 158, 11, 0.15);
+    --warning-border: #D97706;
+    
+    --danger: #EF4444;
+    --danger-bg: rgba(239, 68, 68, 0.15);
+    --danger-border: #DC2626;
+    
+    --info: #0EA5E9;
+    --info-bg: rgba(14, 165, 233, 0.15);
+    --info-border: #0284C7;
+    
+    --text-primary: #F9FAFB;
+    --text-secondary: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --text-dim: #6B7280;
+    
+    --border-subtle: #1F2937;
+    --border-default: #374151;
+    --border-highlight: #4B5563;
+    --border-focus: #3B82F6;
+    
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+
+    --badge-blues-bg: #1E3A8A;     --badge-blues-text: #DBEAFE;     --badge-blues-border: #3B82F6;
+    --badge-classical-bg: #78350F; --badge-classical-text: #FEF3C7; --badge-classical-border: #D97706;
+    --badge-country-bg: #7C2D12;   --badge-country-text: #FFEDD5;   --badge-country-border: #EA580C;
+    --badge-disco-bg: #831843;     --badge-disco-text: #FCE7F3;     --badge-disco-border: #DB2777;
+    --badge-hiphop-bg: #581C87;    --badge-hiphop-text: #F3E8FF;    --badge-hiphop-border: #9333EA;
+    --badge-jazz-bg: #134E4A;      --badge-jazz-text: #CCFBF1;      --badge-jazz-border: #0D9488;
+    --badge-metal-bg: #7F1D1D;     --badge-metal-text: #FEE2E2;     --badge-metal-border: #DC2626;
+    --badge-pop-bg: #881337;       --badge-pop-text: #FFE4E6;       --badge-pop-border: #E11D48;
+    --badge-reggae-bg: #14532D;    --badge-reggae-text: #DCFCE7;    --badge-reggae-border: #16A34A;
+    --badge-rock-bg: #4C1D95;      --badge-rock-text: #EDE9FE;      --badge-rock-border: #7C3AED;
+}
+
+/* Base Setup */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -81,8 +148,7 @@ body {
     line-height: 1.55;
     min-height: 100vh;
     overflow-x: hidden;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    transition: background-color var(--transition), color var(--transition);
 }
 
 /* Typography Hierarchy */
@@ -99,16 +165,12 @@ p {
 
 .text-gradient {
     color: var(--primary);
-    background: linear-gradient(135deg, #3B82F6 0%, #60A5FA 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700;
 }
 
 .text-cyan-gradient {
     color: var(--info);
-    background: linear-gradient(135deg, #0EA5E9 0%, #38BDF8 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-weight: 700;
 }
 
 /* Navigation Bar */
@@ -119,6 +181,7 @@ p {
     position: sticky;
     top: 0;
     z-index: 1000;
+    box-shadow: var(--shadow-xs);
 }
 
 .navbar-brand {
@@ -144,7 +207,7 @@ p {
 }
 
 .nav-link-custom {
-    color: var(--text-muted) !important;
+    color: var(--text-secondary) !important;
     font-weight: 500;
     font-size: 0.9rem;
     padding: 0.45rem 0.85rem !important;
@@ -154,8 +217,30 @@ p {
 }
 
 .nav-link-custom:hover, .nav-link-custom.active {
-    color: var(--text-primary) !important;
+    color: var(--primary) !important;
     background-color: var(--bg-surface-elevated);
+}
+
+/* Theme Switcher Toggle */
+.theme-toggle-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background-color: var(--bg-surface-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 1rem;
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--bg-surface-hover);
+    color: var(--primary);
+    border-color: var(--border-highlight);
 }
 
 /* Solid Production Cards */
@@ -244,12 +329,13 @@ p {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    text-decoration: none;
 }
 
 .btn-sample:hover {
     background-color: var(--primary-light);
     border-color: var(--primary);
-    color: #93C5FD;
+    color: var(--primary);
 }
 
 /* Upload Dropzone */
@@ -266,7 +352,7 @@ p {
 
 .dropzone-container:hover, .dropzone-container.dragover {
     border-color: var(--primary);
-    background-color: rgba(37, 99, 235, 0.04);
+    background-color: var(--primary-light);
 }
 
 .dropzone-icon {
@@ -279,7 +365,7 @@ p {
     align-items: center;
     justify-content: center;
     font-size: 1.75rem;
-    color: #60A5FA;
+    color: var(--primary);
     transition: var(--transition);
 }
 
@@ -290,7 +376,7 @@ p {
 
 /* Audio Player Component */
 .audio-player-card {
-    background-color: var(--bg-base);
+    background-color: var(--bg-surface-elevated);
     border: 1px solid var(--border-default);
     border-radius: var(--radius-md);
     padding: 1rem 1.25rem;
@@ -359,16 +445,16 @@ p {
     gap: 0.35rem;
 }
 
-.badge-blues     { background: #1E3A8A; color: #DBEAFE; border: 1px solid #3B82F6; }
-.badge-classical { background: #78350F; color: #FEF3C7; border: 1px solid #D97706; }
-.badge-country   { background: #7C2D12; color: #FFEDD5; border: 1px solid #EA580C; }
-.badge-disco     { background: #831843; color: #FCE7F3; border: 1px solid #DB2777; }
-.badge-hiphop    { background: #581C87; color: #F3E8FF; border: 1px solid #9333EA; }
-.badge-jazz      { background: #134E4A; color: #CCFBF1; border: 1px solid #0D9488; }
-.badge-metal     { background: #7F1D1D; color: #FEE2E2; border: 1px solid #DC2626; }
-.badge-pop       { background: #881337; color: #FFE4E6; border: 1px solid #E11D48; }
-.badge-reggae    { background: #14532D; color: #DCFCE7; border: 1px solid #16A34A; }
-.badge-rock      { background: #4C1D95; color: #EDE9FE; border: 1px solid #7C3AED; }
+.badge-blues     { background: var(--badge-blues-bg);     color: var(--badge-blues-text);     border: 1px solid var(--badge-blues-border); }
+.badge-classical { background: var(--badge-classical-bg); color: var(--badge-classical-text); border: 1px solid var(--badge-classical-border); }
+.badge-country   { background: var(--badge-country-bg);   color: var(--badge-country-text);   border: 1px solid var(--badge-country-border); }
+.badge-disco     { background: var(--badge-disco-bg);     color: var(--badge-disco-text);     border: 1px solid var(--badge-disco-border); }
+.badge-hiphop    { background: var(--badge-hiphop-bg);    color: var(--badge-hiphop-text);    border: 1px solid var(--badge-hiphop-border); }
+.badge-jazz      { background: var(--badge-jazz-bg);      color: var(--badge-jazz-text);      border: 1px solid var(--badge-jazz-border); }
+.badge-metal     { background: var(--badge-metal-bg);     color: var(--badge-metal-text);     border: 1px solid var(--badge-metal-border); }
+.badge-pop       { background: var(--badge-pop-bg);       color: var(--badge-pop-text);       border: 1px solid var(--badge-pop-border); }
+.badge-reggae    { background: var(--badge-reggae-bg);    color: var(--badge-reggae-text);    border: 1px solid var(--badge-reggae-border); }
+.badge-rock      { background: var(--badge-rock-bg);      color: var(--badge-rock-text);      border: 1px solid var(--badge-rock-border); }
 
 /* Confidence Meter Bar */
 .confidence-meter {
@@ -399,7 +485,7 @@ p {
 .custom-table th {
     padding: 0.85rem 1rem;
     color: var(--text-muted);
-    background-color: var(--bg-base);
+    background-color: var(--bg-surface-elevated);
     font-size: 0.8rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -431,9 +517,9 @@ p {
 .processing-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(11, 15, 25, 0.92);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background-color: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     display: none;
     flex-direction: column;
     align-items: center;
@@ -442,9 +528,9 @@ p {
 }
 
 .loader-spinner {
-    width: 56px;
-    height: 56px;
-    border: 3px solid var(--border-default);
+    width: 50px;
+    height: 50px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
     border-top-color: var(--primary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;

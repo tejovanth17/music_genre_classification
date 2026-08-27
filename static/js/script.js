@@ -2,7 +2,40 @@
  * AI Music Genre Classifier - Client-side UI & Interaction Logic
  */
 
+// Initialize Theme immediately to prevent flash
+(function() {
+    const savedTheme = localStorage.getItem('symphony_theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
+    // Theme Switcher
+    const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    updateThemeIcons(currentTheme);
+
+    themeToggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const activeTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = activeTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('symphony_theme', newTheme);
+            updateThemeIcons(newTheme);
+        });
+    });
+
+    function updateThemeIcons(theme) {
+        themeToggleBtns.forEach(btn => {
+            if (theme === 'dark') {
+                btn.innerHTML = '<i class="fas fa-sun"></i>';
+                btn.title = 'Switch to Light Mode';
+            } else {
+                btn.innerHTML = '<i class="fas fa-moon"></i>';
+                btn.title = 'Switch to Dark Mode';
+            }
+        });
+    }
+
     // 1. Audio Upload & Dropzone Handling
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
@@ -159,7 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedFileCard) selectedFileCard.style.display = 'block';
         if (submitBtn) submitBtn.disabled = false;
 
-        // Auto submit if desired
         if (uploadForm) {
             if (processingOverlay) {
                 processingOverlay.style.display = 'flex';
