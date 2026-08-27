@@ -354,10 +354,17 @@ def run_sota_benchmark():
 
     sota_df = pd.DataFrame(sota_results).sort_values(by="Accuracy (%)", ascending=False).reset_index(drop=True)
 
-    # Save SOTA Benchmark Report
+    # Save SOTA Benchmark Report and Best Models
     csv_path = reports_dir / "sota_models_benchmark_report.csv"
     json_path = reports_dir / "sota_models_benchmark_report.json"
     sota_df.to_csv(csv_path, index=False)
+
+    models_dir = get_output_dir("models")
+    import joblib
+    joblib.dump({"model": lgbm_model, "label_encoder": le, "scaler": _}, models_dir / "sota_lightgbm.joblib")
+    torch.save(resnet.state_dict(), models_dir / "sota_resnet18.pth")
+    torch.save(effnet.state_dict(), models_dir / "sota_efficientnet.pth")
+    torch.save(mobilenet.state_dict(), models_dir / "sota_mobilenet.pth")
 
     with open(json_path, "w") as f:
         json.dump({
@@ -371,6 +378,8 @@ def run_sota_benchmark():
     print(sota_df.to_string(index=False))
     print(f"\n[SAVED] SOTA Benchmark CSV: {csv_path}")
     print(f"[SAVED] SOTA Benchmark JSON: {json_path}")
+    print(f"[SAVED] SOTA LightGBM Model: {models_dir / 'sota_lightgbm.joblib'}")
+    print(f"[SAVED] SOTA ResNet Model:   {models_dir / 'sota_resnet18.pth'}")
     print("=" * 75)
 
 
