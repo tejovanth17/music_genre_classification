@@ -225,11 +225,11 @@
             <div class="glass-card">
                 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
                     <div>
-                        <span class="text-cyan-gradient fw-bold text-uppercase small">Comprehensive Benchmark</span>
+                        <span class="text-cyan-gradient fw-bold text-uppercase small">SOTA Benchmarking Suite</span>
                         <h3 class="fw-bold mt-1 mb-0">Model Performance Leaderboard</h3>
                     </div>
                     <span class="badge bg-primary px-3 py-2 rounded-pill">
-                        <i class="fas fa-check-circle me-1"></i> Tested on 9,990 GTZAN Audio Slices
+                        <i class="fas fa-check-circle me-1"></i> Evaluated on 9,990 Audio Segments
                     </span>
                 </div>
 
@@ -238,77 +238,93 @@
                         <thead>
                             <tr>
                                 <th>Model Architecture</th>
+                                <th>Architecture Type</th>
                                 <th>Accuracy</th>
-                                <th>Precision (W)</th>
-                                <th>Recall (W)</th>
-                                <th>F1-Score (W)</th>
-                                <th>Speed</th>
+                                <th>Weighted F1</th>
+                                <th>Inference (ms)</th>
+                                <th>Footprint / Params</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td><i class="fas fa-trophy text-warning me-2"></i> XGBoost Classifier</td>
-                                <td><span class="badge bg-success">~89.8%</span></td>
-                                <td>0.899</td>
-                                <td>0.898</td>
-                                <td>0.898</td>
-                                <td>Fast (C++ engine)</td>
+                            <tr style="background: rgba(16, 185, 129, 0.05);">
+                                <td><i class="fas fa-crown text-warning me-2"></i> <strong>LightGBM Classifier</strong></td>
+                                <td><span class="badge bg-success">SOTA GBDT Tree</span></td>
+                                <td><strong class="text-success" style="font-size: 1rem;">91.19%</strong></td>
+                                <td>0.9119</td>
+                                <td>0.046 ms</td>
+                                <td>300 Trees (~4 MB)</td>
                             </tr>
                             <tr>
-                                <td><i class="fas fa-medal text-secondary me-2"></i> Random Forest (500 Trees)</td>
-                                <td><span class="badge bg-success">83.7%</span></td>
-                                <td>0.838</td>
-                                <td>0.837</td>
-                                <td>0.836</td>
-                                <td>Parallelized (3.2s)</td>
+                                <td><i class="fas fa-trophy text-warning me-2"></i> <strong>ResNet-18</strong></td>
+                                <td><span class="badge bg-primary">Deep Residual CNN</span></td>
+                                <td><strong class="text-primary" style="font-size: 1rem;">90.19%</strong></td>
+                                <td>0.9018</td>
+                                <td>0.018 ms</td>
+                                <td>83,658 params</td>
                             </tr>
                             <tr>
-                                <td><i class="fas fa-medal text-danger me-2"></i> K-Nearest Neighbors (KNN)</td>
-                                <td><span class="badge bg-info">81.1%</span></td>
-                                <td>0.812</td>
-                                <td>0.811</td>
-                                <td>0.811</td>
-                                <td>1.9s</td>
+                                <td><i class="fas fa-medal text-secondary me-2"></i> <strong>EfficientNet-B0</strong></td>
+                                <td><span class="badge bg-info">Compound Scaled</span></td>
+                                <td><strong>89.63%</strong></td>
+                                <td>0.8963</td>
+                                <td>0.013 ms</td>
+                                <td>28,986 params</td>
                             </tr>
                             <tr>
-                                <td>Support Vector Machine (SVM RBF)</td>
-                                <td><span class="badge bg-info">75.6%</span></td>
-                                <td>0.755</td>
-                                <td>0.756</td>
-                                <td>0.753</td>
-                                <td>9.1s</td>
+                                <td><i class="fas fa-bolt text-warning me-2"></i> <strong>MobileNetV3-Small</strong></td>
+                                <td><span class="badge bg-info">Hard-Swish + SE</span></td>
+                                <td><strong>89.51%</strong></td>
+                                <td>0.8948</td>
+                                <td>0.015 ms</td>
+                                <td>17,474 params</td>
                             </tr>
                             <tr>
-                                <td>Logistic Regression (Softmax)</td>
-                                <td><span class="badge bg-secondary">70.0%</span></td>
-                                <td>0.698</td>
-                                <td>0.700</td>
-                                <td>0.695</td>
-                                <td>0.6s</td>
+                                <td><i class="fas fa-chart-line text-primary me-2"></i> <strong>XGBoost Classifier</strong></td>
+                                <td><span class="badge bg-secondary">Extreme Gradient Boost</span></td>
+                                <td><strong>89.43%</strong></td>
+                                <td>0.8943</td>
+                                <td>0.082 ms</td>
+                                <td>300 Trees</td>
                             </tr>
                             <tr>
-                                <td>Decision Tree Classifier</td>
-                                <td><span class="badge bg-secondary">64.1%</span></td>
-                                <td>0.640</td>
-                                <td>0.641</td>
-                                <td>0.640</td>
-                                <td>0.7s</td>
+                                <td>Random Forest</td>
+                                <td><span class="badge bg-secondary">Ensemble Bagging</span></td>
+                                <td><strong>83.71%</strong></td>
+                                <td>0.8363</td>
+                                <td>0.120 ms</td>
+                                <td>500 Trees</td>
                             </tr>
                             <tr>
-                                <td>Stochastic Gradient Descent (SGD)</td>
-                                <td><span class="badge bg-secondary">63.2%</span></td>
-                                <td>0.625</td>
-                                <td>0.632</td>
-                                <td>0.619</td>
-                                <td>0.3s</td>
+                                <td>Neural Net (MLP 128/64)</td>
+                                <td><span class="badge bg-secondary">Multi-Layer Perceptron</span></td>
+                                <td><strong>83.27%</strong></td>
+                                <td>0.8325</td>
+                                <td>0.022 ms</td>
+                                <td>16,522 params</td>
                             </tr>
                             <tr>
-                                <td>Gaussian Naive Bayes</td>
-                                <td><span class="badge bg-secondary">50.8%</span></td>
-                                <td>0.512</td>
-                                <td>0.508</td>
-                                <td>0.488</td>
-                                <td>&lt;0.1s</td>
+                                <td>K-Nearest Neighbors (KNN)</td>
+                                <td><span class="badge bg-secondary">Distance Metric</span></td>
+                                <td><strong>81.06%</strong></td>
+                                <td>0.8113</td>
+                                <td>1.990 ms</td>
+                                <td>Non-parametric</td>
+                            </tr>
+                            <tr>
+                                <td>YOLOv8-cls (Nano)</td>
+                                <td><span class="badge bg-secondary">CSPNet Backbone</span></td>
+                                <td><strong>75.54%</strong></td>
+                                <td>0.7534</td>
+                                <td>0.015 ms</td>
+                                <td>53,514 params</td>
+                            </tr>
+                            <tr>
+                                <td>Support Vector Machine (SVM)</td>
+                                <td><span class="badge bg-secondary">RBF Kernel</span></td>
+                                <td><strong>75.58%</strong></td>
+                                <td>0.7534</td>
+                                <td>0.310 ms</td>
+                                <td>Kernel boundary</td>
                             </tr>
                         </tbody>
                     </table>
