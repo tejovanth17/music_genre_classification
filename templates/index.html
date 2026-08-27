@@ -3,940 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Music Genre Classification - AI-Powered Audio Analysis</title>
+    <title>Symphony AI - Music Genre Classification & Audio Intelligence</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body style="
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f8fafc;
-    min-height: 100vh;
-    color: #334155;
-    line-height: 1.6;
-    overflow-x: hidden;
-">
-    <!-- Scroll Progress Indicator -->
-    <div id="scrollIndicator" style="
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: #2563eb;
-        transform-origin: left;
-        transform: scaleX(0);
-        z-index: 1000;
-        transition: transform 0.1s ease;
-    "></div>
-    
-    <!-- Hero Section -->
-    <section style="
-        background: #1e293b;
-        color: #ffffff;
-        padding: 100px 0 80px 0;
-        position: relative;
-        overflow: hidden;
-    ">
-        <!-- Background Pattern -->
-        <div style="
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 1000 1000%22%3E%3Ccircle cx=%22200%22 cy=%22200%22 r=%222%22 fill=%22%23ffffff%22 opacity=%220.1%22/%3E%3Ccircle cx=%22800%22 cy=%22300%22 r=%222%22 fill=%22%23ffffff%22 opacity=%220.1%22/%3E%3Ccircle cx=%22400%22 cy=%22600%22 r=%222%22 fill=%22%23ffffff%22 opacity=%220.1%22/%3E%3Ccircle cx=%22600%22 cy=%22800%22 r=%222%22 fill=%22%23ffffff%22 opacity=%220.1%22/%3E%3C/svg%3E');
-            z-index: 1;
-        "></div>
-        
-        <!-- Floating Icons -->
-        <div style="
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-        ">
-            <i class="fas fa-music" style="
-                position: absolute;
-                top: 15%;
-                left: 8%;
-                color: rgba(37, 99, 235, 0.4);
-                font-size: 2rem;
-                animation: float 6s ease-in-out infinite;
-            "></i>
-            <i class="fas fa-headphones" style="
-                position: absolute;
-                top: 65%;
-                right: 10%;
-                color: rgba(5, 150, 105, 0.4);
-                font-size: 2rem;
-                animation: float 6s ease-in-out infinite 1s;
-            "></i>
-            <i class="fas fa-wave-square" style="
-                position: absolute;
-                top: 25%;
-                right: 15%;
-                color: rgba(124, 58, 237, 0.4);
-                font-size: 2rem;
-                animation: float 6s ease-in-out infinite 2s;
-            "></i>
-            <i class="fas fa-microphone" style="
-                position: absolute;
-                bottom: 20%;
-                left: 12%;
-                color: rgba(220, 38, 38, 0.4);
-                font-size: 2rem;
-                animation: float 6s ease-in-out infinite 3s;
-            "></i>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar-custom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="/" class="navbar-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-wave-square"></i>
+                </div>
+                <span>Symphony<span class="text-gradient">AI</span></span>
+            </a>
+            <div class="d-none d-md-flex align-items-center gap-3">
+                <a href="#features" class="nav-link-custom">Features</a>
+                <a href="#genres" class="nav-link-custom">10 Genres</a>
+                <a href="#benchmarks" class="nav-link-custom">Benchmarks</a>
+                <a href="#pipeline" class="nav-link-custom">Architecture</a>
+            </div>
+            <a href="/upload" class="btn-primary-glow">
+                <i class="fas fa-play"></i>
+                <span>Analyze Audio</span>
+            </a>
         </div>
-        
-        <div class="container" style="position: relative; z-index: 3;">
-            <div class="row justify-content-center text-center">
-                <div class="col-lg-10">
-                    <h1 style="
-                        font-size: 3.5rem;
-                        font-weight: 800;
-                        margin-bottom: 1.5rem;
-                        color: #ffffff;
-                        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-                    ">
-                        <i class="fas fa-music" style="color: #2563eb; margin-right: 15px;"></i>
-                        Music Genre Classification
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-5 my-4 position-relative">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-7 text-start">
+                    <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4" 
+                         style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3);">
+                        <span class="pulse-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span>
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Powered by TensorFlow & Librosa</span>
+                    </div>
+                    <h1 class="display-4 fw-bold mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                        Deep Audio AI for <br>
+                        <span class="text-gradient">Music Genre Classification</span>
                     </h1>
-                    <p style="
-                        font-size: 1.4rem;
-                        margin-bottom: 2.5rem;
-                        font-weight: 300;
-                        color: #e2e8f0;
-                        max-width: 800px;
-                        margin-left: auto;
-                        margin-right: auto;
-                        line-height: 1.6;
-                    ">
-                        Harness the power of artificial intelligence to instantly classify your music. 
-                        Our advanced CNN deep learning model analyzes audio spectrograms to identify genres with 85% accuracy.
+                    <p class="lead text-secondary mb-4" style="max-width: 580px;">
+                        Extract harmonic spectrograms, MFCC timbral features, and spectral centroids to classify tracks across 10 musical genres in real time with high accuracy.
                     </p>
-                    <div>
-                        <a href="{{ url_for('upload_page') }}" style="
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 12px;
-                            background: #2563eb;
-                            color: #ffffff;
-                            padding: 18px 40px;
-                            border-radius: 12px;
-                            font-weight: 600;
-                            font-size: 1.1rem;
-                            text-decoration: none;
-                            transition: all 0.3s ease;
-                            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
-                        " onmouseover="
-                            this.style.transform='translateY(-3px)';
-                            this.style.boxShadow='0 12px 35px rgba(37, 99, 235, 0.5)';
-                            this.style.background='#1d4ed8';
-                        " onmouseout="
-                            this.style.transform='translateY(0)';
-                            this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.4)';
-                            this.style.background='#2563eb';
-                        ">
-                            <i class="fas fa-play-circle"></i>
-                            Start Classification
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="/upload" class="btn-primary-glow">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Upload & Classify Track</span>
                         </a>
+                        <a href="#benchmarks" class="btn-secondary-glass">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>View Model Benchmarks</span>
+                        </a>
+                    </div>
+
+                    <!-- Metrics Badges -->
+                    <div class="row mt-5 pt-3 g-4 border-top" style="border-color: var(--border-subtle) !important;">
+                        <div class="col-4">
+                            <h3 class="fw-bold mb-0 text-cyan-gradient">10</h3>
+                            <p class="text-muted small mb-0">GTZAN Genres</p>
+                        </div>
+                        <div class="col-4">
+                            <h3 class="fw-bold mb-0 text-gradient">9,990+</h3>
+                            <p class="text-muted small mb-0">Audio Segments</p>
+                        </div>
+                        <div class="col-4">
+                            <h3 class="fw-bold mb-0" style="color: var(--accent-emerald);">~90%</h3>
+                            <p class="text-muted small mb-0">Top Accuracy</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hero Interactive Visualizer Card -->
+                <div class="col-lg-5">
+                    <div class="glass-card">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge-reggae genre-badge"><i class="fas fa-music"></i> Reggae Demo</span>
+                            </div>
+                            <div class="wave-bars">
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                                <div class="wave-bar"></div>
+                            </div>
+                        </div>
+
+                        <!-- Live Spectrogram Simulator -->
+                        <div class="position-relative rounded-3 overflow-hidden mb-3" 
+                             style="height: 180px; background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center;">
+                            <div style="text-align: center;">
+                                <i class="fas fa-wave-square mb-2" style="font-size: 2.5rem; color: var(--accent-cyan);"></i>
+                                <p class="small text-muted mb-0">128-Band Mel Spectrogram Extraction</p>
+                                <span class="badge bg-dark border border-secondary mt-1">22,050 Hz • 30s FFT</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Test Presets -->
+                        <p class="small text-muted mb-2 fw-semibold">Try 1-Click GTZAN Samples:</p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="/predict-sample/reggae.00036.wav" class="btn-sample">
+                                <i class="fas fa-play-circle text-success"></i> Reggae 36
+                            </a>
+                            <a href="/predict-sample/metal.00036.wav" class="btn-sample">
+                                <i class="fas fa-play-circle text-danger"></i> Metal 36
+                            </a>
+                            <a href="/predict-sample/classical.00036.wav" class="btn-sample">
+                                <i class="fas fa-play-circle text-warning"></i> Classical 36
+                            </a>
+                            <a href="/predict-sample/pop.00019.wav" class="btn-sample">
+                                <i class="fas fa-play-circle text-info"></i> Pop 19
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 10 Genres Section -->
+    <section id="genres" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-gradient fw-bold text-uppercase small">Acoustic Diversity</span>
+                <h2 class="display-6 fw-bold mt-1">10 Supported Music Genres</h2>
+                <p class="text-muted mx-auto" style="max-width: 600px;">
+                    Our models classify complex multi-instrumental harmonies, tempo rhythms, and timbre envelopes.
+                </p>
+            </div>
+
+            <div class="row g-3 justify-content-center">
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-guitar mb-2" style="font-size: 1.5rem; color: #60A5FA;"></i>
+                        <h6 class="mb-0">Blues</h6>
+                        <small class="text-dim">12-bar & slides</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-compact-disc mb-2" style="font-size: 1.5rem; color: #FACC15;"></i>
+                        <h6 class="mb-0">Classical</h6>
+                        <small class="text-dim">Orchestral</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-hat-cowboy mb-2" style="font-size: 1.5rem; color: #F59E0B;"></i>
+                        <h6 class="mb-0">Country</h6>
+                        <small class="text-dim">Acoustic & twang</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-record-vinyl mb-2" style="font-size: 1.5rem; color: #F472B6;"></i>
+                        <h6 class="mb-0">Disco</h6>
+                        <small class="text-dim">Four-on-floor</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-microphone-alt mb-2" style="font-size: 1.5rem; color: #C084FC;"></i>
+                        <h6 class="mb-0">Hip Hop</h6>
+                        <small class="text-dim">808s & syncopation</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-saxophone mb-2" style="font-size: 1.5rem; color: #2DD4BF;"></i>
+                        <h6 class="mb-0">Jazz</h6>
+                        <small class="text-dim">Improv & swing</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-bolt mb-2" style="font-size: 1.5rem; color: #F87171;"></i>
+                        <h6 class="mb-0">Metal</h6>
+                        <small class="text-dim">Distortion & double-kick</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-headphones-alt mb-2" style="font-size: 1.5rem; color: #FB7185;"></i>
+                        <h6 class="mb-0">Pop</h6>
+                        <small class="text-dim">Catchy vocal hooks</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-drum mb-2" style="font-size: 1.5rem; color: #4ADE80;"></i>
+                        <h6 class="mb-0">Reggae</h6>
+                        <small class="text-dim">Offbeat skank</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-4 col-lg-2">
+                    <div class="glass-card text-center p-3">
+                        <i class="fas fa-volume-up mb-2" style="font-size: 1.5rem; color: #A855F7;"></i>
+                        <h6 class="mb-0">Rock</h6>
+                        <small class="text-dim">Overdriven riffs</small>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    
-    <!-- Features Section -->
-    <section style="
-        padding: 100px 0;
-        background: #ffffff;
-    ">
+
+    <!-- Benchmark Leaderboard Section -->
+    <section id="benchmarks" class="py-5">
         <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col-12">
-                    <h2 style="
-                        font-size: 2.5rem;
-                        font-weight: 700;
-                        color: #1e293b;
-                        margin-bottom: 1rem;
-                    ">How It Works</h2>
-                    <p style="
-                        font-size: 1.2rem;
-                        color: #64748b;
-                        margin: 0;
-                    ">Three simple steps to discover your music's genre</p>
+            <div class="glass-card">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                    <div>
+                        <span class="text-cyan-gradient fw-bold text-uppercase small">Comprehensive Benchmark</span>
+                        <h3 class="fw-bold mt-1 mb-0">Model Performance Leaderboard</h3>
+                    </div>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill">
+                        <i class="fas fa-check-circle me-1"></i> Tested on 9,990 GTZAN Audio Slices
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>Model Architecture</th>
+                                <th>Accuracy</th>
+                                <th>Precision (W)</th>
+                                <th>Recall (W)</th>
+                                <th>F1-Score (W)</th>
+                                <th>Speed</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><i class="fas fa-trophy text-warning me-2"></i> XGBoost Classifier</td>
+                                <td><span class="badge bg-success">~89.8%</span></td>
+                                <td>0.899</td>
+                                <td>0.898</td>
+                                <td>0.898</td>
+                                <td>Fast (C++ engine)</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-medal text-secondary me-2"></i> Random Forest (500 Trees)</td>
+                                <td><span class="badge bg-success">83.7%</span></td>
+                                <td>0.838</td>
+                                <td>0.837</td>
+                                <td>0.836</td>
+                                <td>Parallelized (3.2s)</td>
+                            </tr>
+                            <tr>
+                                <td><i class="fas fa-medal text-danger me-2"></i> K-Nearest Neighbors (KNN)</td>
+                                <td><span class="badge bg-info">81.1%</span></td>
+                                <td>0.812</td>
+                                <td>0.811</td>
+                                <td>0.811</td>
+                                <td>1.9s</td>
+                            </tr>
+                            <tr>
+                                <td>Support Vector Machine (SVM RBF)</td>
+                                <td><span class="badge bg-info">75.6%</span></td>
+                                <td>0.755</td>
+                                <td>0.756</td>
+                                <td>0.753</td>
+                                <td>9.1s</td>
+                            </tr>
+                            <tr>
+                                <td>Logistic Regression (Softmax)</td>
+                                <td><span class="badge bg-secondary">70.0%</span></td>
+                                <td>0.698</td>
+                                <td>0.700</td>
+                                <td>0.695</td>
+                                <td>0.6s</td>
+                            </tr>
+                            <tr>
+                                <td>Decision Tree Classifier</td>
+                                <td><span class="badge bg-secondary">64.1%</span></td>
+                                <td>0.640</td>
+                                <td>0.641</td>
+                                <td>0.640</td>
+                                <td>0.7s</td>
+                            </tr>
+                            <tr>
+                                <td>Stochastic Gradient Descent (SGD)</td>
+                                <td><span class="badge bg-secondary">63.2%</span></td>
+                                <td>0.625</td>
+                                <td>0.632</td>
+                                <td>0.619</td>
+                                <td>0.3s</td>
+                            </tr>
+                            <tr>
+                                <td>Gaussian Naive Bayes</td>
+                                <td><span class="badge bg-secondary">50.8%</span></td>
+                                <td>0.512</td>
+                                <td>0.508</td>
+                                <td>0.488</td>
+                                <td>&lt;0.1s</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            
+        </div>
+    </section>
+
+    <!-- Architecture & Features Section -->
+    <section id="pipeline" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-gradient fw-bold text-uppercase small">Pipeline</span>
+                <h2 class="display-6 fw-bold mt-1">End-to-End Audio Intelligence</h2>
+            </div>
+
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div style="
-                        background: #ffffff;
-                        border-radius: 16px;
-                        padding: 40px 30px;
-                        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-                        border: 1px solid #e2e8f0;
-                        transition: all 0.3s ease;
-                        height: 100%;
-                        text-align: center;
-                    " onmouseover="
-                        this.style.transform='translateY(-8px)';
-                        this.style.boxShadow='0 20px 40px rgba(0, 0, 0, 0.12)';
-                        this.querySelector('.feature-icon').style.transform='scale(1.1)';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.08)';
-                        this.querySelector('.feature-icon').style.transform='scale(1)';
-                    ">
-                        <div class="feature-icon" style="
-                            width: 80px;
-                            height: 80px;
-                            border-radius: 50%;
-                            background: #2563eb;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin: 0 auto 25px;
-                            font-size: 2rem;
-                            color: #ffffff;
-                            transition: all 0.3s ease;
-                        ">
-                            <i class="fas fa-cloud-upload-alt"></i>
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <div class="brand-icon mb-3" style="background: var(--grad-cyan);">
+                            <i class="fas fa-file-audio"></i>
                         </div>
-                        <h4 style="
-                            font-size: 1.4rem;
-                            font-weight: 600;
-                            margin-bottom: 15px;
-                            color: #1e293b;
-                        ">Upload Audio</h4>
-                        <p style="
-                            color: #64748b;
-                            line-height: 1.7;
-                            margin: 0;
-                        ">
-                            Simply drag and drop your audio file or click to browse. 
-                            We support WAV, MP3, FLAC, M4A, and OGG formats up to 50MB.
+                        <h5 class="fw-bold">1. Acoustic Ingestion</h5>
+                        <p class="text-muted">
+                            Loads standard audio formats (.wav, .mp3, .flac) at 22,050 Hz, trims leading/trailing silent regions, and standardizes gain levels.
                         </p>
                     </div>
                 </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div style="
-                        background: #ffffff;
-                        border-radius: 16px;
-                        padding: 40px 30px;
-                        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-                        border: 1px solid #e2e8f0;
-                        transition: all 0.3s ease;
-                        height: 100%;
-                        text-align: center;
-                    " onmouseover="
-                        this.style.transform='translateY(-8px)';
-                        this.style.boxShadow='0 20px 40px rgba(0, 0, 0, 0.12)';
-                        this.querySelector('.feature-icon').style.transform='scale(1.1)';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.08)';
-                        this.querySelector('.feature-icon').style.transform='scale(1)';
-                    ">
-                        <div class="feature-icon" style="
-                            width: 80px;
-                            height: 80px;
-                            border-radius: 50%;
-                            background: #7c3aed;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin: 0 auto 25px;
-                            font-size: 2rem;
-                            color: #ffffff;
-                            transition: all 0.3s ease;
-                        ">
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <div class="brand-icon mb-3" style="background: var(--grad-primary);">
                             <i class="fas fa-brain"></i>
                         </div>
-                        <h4 style="
-                            font-size: 1.4rem;
-                            font-weight: 600;
-                            margin-bottom: 15px;
-                            color: #1e293b;
-                        ">AI Analysis</h4>
-                        <p style="
-                            color: #64748b;
-                            line-height: 1.7;
-                            margin: 0;
-                        ">
-                            Our CNN model analyzes mel-spectrograms and extracts complex audio features 
-                            to understand the musical patterns and characteristics.
+                        <h5 class="fw-bold">2. Feature Extraction</h5>
+                        <p class="text-muted">
+                            Computes 128-band Mel-Spectrograms, STFT matrices, 20 MFCCs, Spectral Centroids, Spectral Roll-off, and Harmonic/Percussive decompositions.
                         </p>
                     </div>
                 </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div style="
-                        background: #ffffff;
-                        border-radius: 16px;
-                        padding: 40px 30px;
-                        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-                        border: 1px solid #e2e8f0;
-                        transition: all 0.3s ease;
-                        height: 100%;
-                        text-align: center;
-                    " onmouseover="
-                        this.style.transform='translateY(-8px)';
-                        this.style.boxShadow='0 20px 40px rgba(0, 0, 0, 0.12)';
-                        this.querySelector('.feature-icon').style.transform='scale(1.1)';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.08)';
-                        this.querySelector('.feature-icon').style.transform='scale(1)';
-                    ">
-                        <div class="feature-icon" style="
-                            width: 80px;
-                            height: 80px;
-                            border-radius: 50%;
-                            background: #059669;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            margin: 0 auto 25px;
-                            font-size: 2rem;
-                            color: #ffffff;
-                            transition: all 0.3s ease;
-                        ">
+                <div class="col-md-4">
+                    <div class="glass-card h-100">
+                        <div class="brand-icon mb-3" style="background: linear-gradient(135deg, #10B981, #06B6D4);">
                             <i class="fas fa-chart-pie"></i>
                         </div>
-                        <h4 style="
-                            font-size: 1.4rem;
-                            font-weight: 600;
-                            margin-bottom: 15px;
-                            color: #1e293b;
-                        ">Get Results</h4>
-                        <p style="
-                            color: #64748b;
-                            line-height: 1.7;
-                            margin: 0;
-                        ">
-                            Receive detailed classification results with confidence scores, 
-                            visual spectrograms, and probability distributions across all genres.
+                        <h5 class="fw-bold">3. Prediction & Recommender</h5>
+                        <p class="text-muted">
+                            Evaluates deep convolutional tensor activations to output probability distributions and suggests sonically similar tracks via Cosine Similarity.
                         </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    
-    <!-- Stats Section -->
-    <section style="
-        background: #1e293b;
-        color: #ffffff;
-        padding: 80px 0;
-    ">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-md-3 col-6 mb-4">
-                    <div style="padding: 20px;">
-                        <span class="stat-number" data-target="85" style="
-                            font-size: 3.5rem;
-                            font-weight: 800;
-                            display: block;
-                            margin-bottom: 10px;
-                            color: #60a5fa;
-                        ">85</span>
-                        <span style="
-                            font-size: 1.1rem;
-                            color: #e2e8f0;
-                            font-weight: 500;
-                        ">% Accuracy</span>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4">
-                    <div style="padding: 20px;">
-                        <span class="stat-number" data-target="10" style="
-                            font-size: 3.5rem;
-                            font-weight: 800;
-                            display: block;
-                            margin-bottom: 10px;
-                            color: #34d399;
-                        ">10</span>
-                        <span style="
-                            font-size: 1.1rem;
-                            color: #e2e8f0;
-                            font-weight: 500;
-                        ">Genres Supported</span>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4">
-                    <div style="padding: 20px;">
-                        <span class="stat-number" data-target="1000" style="
-                            font-size: 3.5rem;
-                            font-weight: 800;
-                            display: block;
-                            margin-bottom: 10px;
-                            color: #a78bfa;
-                        ">1000</span>
-                        <span style="
-                            font-size: 1.1rem;
-                            color: #e2e8f0;
-                            font-weight: 500;
-                        ">Songs Analyzed</span>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6 mb-4">
-                    <div style="padding: 20px;">
-                        <span class="stat-number" data-target="99" style="
-                            font-size: 3.5rem;
-                            font-weight: 800;
-                            display: block;
-                            margin-bottom: 10px;
-                            color: #fb7185;
-                        ">99</span>
-                        <span style="
-                            font-size: 1.1rem;
-                            color: #e2e8f0;
-                            font-weight: 500;
-                        ">% Satisfaction</span>
-                    </div>
-                </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="d-flex align-items-center gap-2">
+                <i class="fas fa-wave-square text-primary"></i>
+                <span class="fw-bold text-white">Symphony AI</span>
+                <span class="text-dim">• Music Genre Classification & Audio Intelligence</span>
+            </div>
+            <div class="text-dim">
+                Built with TensorFlow, Librosa, Scikit-Learn & Flask
             </div>
         </div>
-    </section>
-    
-    <!-- Genres Section -->
-    <section style="
-        padding: 100px 0;
-        background: #f8fafc;
-    ">
-        <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col-12">
-                    <h2 style="
-                        font-size: 2.5rem;
-                        font-weight: 700;
-                        color: #1e293b;
-                        margin-bottom: 1rem;
-                    ">Supported Genres</h2>
-                    <p style="
-                        font-size: 1.2rem;
-                        color: #64748b;
-                        margin: 0;
-                    ">Our AI can classify music across these diverse genres</p>
-                </div>
-            </div>
-            
-            <div class="row justify-content-center">
-                <div class="col-lg-10 text-center">
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#2563eb';
-                        this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.15)';
-                        this.style.backgroundColor='#eff6ff';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🎵 Blues</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#059669';
-                        this.style.boxShadow='0 8px 25px rgba(5, 150, 105, 0.15)';
-                        this.style.backgroundColor='#ecfdf5';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🎼 Classical</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#7c3aed';
-                        this.style.boxShadow='0 8px 25px rgba(124, 58, 237, 0.15)';
-                        this.style.backgroundColor='#faf5ff';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🤠 Country</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#dc2626';
-                        this.style.boxShadow='0 8px 25px rgba(220, 38, 38, 0.15)';
-                        this.style.backgroundColor='#fef2f2';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🕺 Disco</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#2563eb';
-                        this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.15)';
-                        this.style.backgroundColor='#eff6ff';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🎤 Hip-hop</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#059669';
-                        this.style.boxShadow='0 8px 25px rgba(5, 150, 105, 0.15)';
-                        this.style.backgroundColor='#ecfdf5';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🎷 Jazz</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#7c3aed';
-                        this.style.boxShadow='0 8px 25px rgba(124, 58, 237, 0.15)';
-                        this.style.backgroundColor='#faf5ff';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🤘 Metal</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#dc2626';
-                        this.style.boxShadow='0 8px 25px rgba(220, 38, 38, 0.15)';
-                        this.style.backgroundColor='#fef2f2';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🎤 Pop</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#2563eb';
-                        this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.15)';
-                        this.style.backgroundColor='#eff6ff';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🏝️ Reggae</div>
-                    
-                    <div style="
-                        display: inline-block;
-                        background: #ffffff;
-                        color: #1e293b;
-                        padding: 12px 24px;
-                        border-radius: 12px;
-                        margin: 8px;
-                        font-weight: 600;
-                        transition: all 0.3s ease;
-                        cursor: pointer;
-                        border: 2px solid #e2e8f0;
-                        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-                    " onmouseover="
-                        this.style.transform='translateY(-3px)';
-                        this.style.borderColor='#059669';
-                        this.style.boxShadow='0 8px 25px rgba(5, 150, 105, 0.15)';
-                        this.style.backgroundColor='#ecfdf5';
-                    " onmouseout="
-                        this.style.transform='translateY(0)';
-                        this.style.borderColor='#e2e8f0';
-                        this.style.boxShadow='0 4px 15px rgba(0, 0, 0, 0.05)';
-                        this.style.backgroundColor='#ffffff';
-                    ">🎸 Rock</div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Demo Section -->
-    <section style="
-        padding: 100px 0;
-        background: #ffffff;
-    ">
-        <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col-12">
-                    <h2 style="
-                        font-size: 2.5rem;
-                        font-weight: 700;
-                        color: #1e293b;
-                        margin-bottom: 1rem;
-                    ">Try It Now</h2>
-                    <p style="
-                        font-size: 1.2rem;
-                        color: #64748b;
-                        margin: 0;
-                    ">Experience the power of AI music classification</p>
-                </div>
-            </div>
-            
-            <div class="row justify-content-center">
-                <div class="col-lg-6">
-                    <div style="
-                        background: #f8fafc;
-                        border-radius: 20px;
-                        padding: 40px;
-                        border: 2px solid #e2e8f0;
-                        transition: all 0.3s ease;
-                        text-align: center;
-                    " onmouseover="
-                        this.style.borderColor='#2563eb';
-                        this.style.background='#eff6ff';
-                        this.style.transform='translateY(-5px)';
-                    " onmouseout="
-                        this.style.borderColor='#e2e8f0';
-                        this.style.background='#f8fafc';
-                        this.style.transform='translateY(0)';
-                    ">
-                        <i class="fas fa-play-circle" style="
-                            font-size: 4rem;
-                            color: #2563eb;
-                            margin-bottom: 20px;
-                        "></i>
-                        <h4 style="
-                            color: #1e293b;
-                            margin-bottom: 15px;
-                            font-weight: 600;
-                        ">Ready to discover your music's genre?</h4>
-                        <p style="
-                            color: #64748b;
-                            margin-bottom: 25px;
-                            line-height: 1.6;
-                        ">Upload any audio file and let our AI analyze it with precision!</p>
-                        <a href="{{ url_for('upload_page') }}" style="
-                            display: inline-flex;
-                            align-items: center;
-                            gap: 10px;
-                            background: #2563eb;
-                            color: #ffffff;
-                            padding: 15px 30px;
-                            border-radius: 12px;
-                            font-weight: 600;
-                            text-decoration: none;
-                            transition: all 0.3s ease;
-                        " onmouseover="
-                            this.style.background='#1d4ed8';
-                            this.style.transform='translateY(-2px)';
-                            this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.3)';
-                        " onmouseout="
-                            this.style.background='#2563eb';
-                            this.style.transform='translateY(0)';
-                            this.style.boxShadow='none';
-                        ">
-                            <i class="fas fa-upload"></i>
-                            Upload Audio File
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- CTA Section -->
-    <section style="
-        background: #1e293b;
-        color: #ffffff;
-        padding: 80px 0;
-        text-align: center;
-    ">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-12">
-                    <h2 style="
-                        font-size: 2.5rem;
-                        font-weight: 700;
-                        margin-bottom: 1rem;
-                        color: #ffffff;
-                    ">Ready to Get Started?</h2>
-                    <p style="
-                        font-size: 1.2rem;
-                        margin-bottom: 2rem;
-                        color: #e2e8f0;
-                        max-width: 600px;
-                        margin-left: auto;
-                        margin-right: auto;
-                    ">Join thousands of music enthusiasts who trust our AI for accurate genre classification</p>
-                    <a href="{{ url_for('upload_page') }}" style="
-                        display: inline-flex;
-                        align-items: center;
-                        gap: 12px;
-                        background: #2563eb;
-                        color: #ffffff;
-                        padding: 18px 40px;
-                        border-radius: 12px;
-                        font-weight: 600;
-                        font-size: 1.1rem;
-                        text-decoration: none;
-                        transition: all 0.3s ease;
-                    " onmouseover="
-                        this.style.background='#1d4ed8';
-                        this.style.transform='translateY(-3px)';
-                        this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.4)';
-                    " onmouseout="
-                        this.style.background='#2563eb';
-                        this.style.transform='translateY(0)';
-                        this.style.boxShadow='none';
-                    ">
-                        <i class="fas fa-rocket"></i>
-                        Start Classifying Music
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem !important;
-            }
-            
-            h2 {
-                font-size: 2rem !important;
-            }
-            
-            .hero-subtitle {
-                font-size: 1.1rem !important;
-            }
-            
-            .stat-number {
-                font-size: 2.5rem !important;
-            }
-            
-            .container {
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-        }
-    </style>
-    
-    <script>
-        // Scroll Progress Indicator
-        window.addEventListener('scroll', () => {
-            const scrollTop = window.pageYOffset;
-            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollPercent = Math.min((scrollTop / docHeight) * 100, 100);
-            document.getElementById('scrollIndicator').style.transform = `scaleX(${scrollPercent / 100})`;
-        });
-        
-        // Animated counters
-        const animateCounters = () => {
-            const counters = document.querySelectorAll('.stat-number');
-            counters.forEach(counter => {
-                const target = parseInt(counter.getAttribute('data-target'));
-                const duration = 2000;
-                const step = target / (duration / 16);
-                let current = 0;
-                
-                const updateCounter = () => {
-                    current += step;
-                    if (current < target) {
-                        counter.textContent = Math.floor(current);
-                        requestAnimationFrame(updateCounter);
-                    } else {
-                        counter.textContent = target;
-                    }
-                };
-                updateCounter();
-            });
-        };
-        
-        // Trigger counter animation when stats section is visible
-        const statsSection = document.querySelector('section[style*="background: #1e293b"]');
-        const statsObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounters();
-                    statsObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.5 });
-        
-        if (statsSection) {
-            statsObserver.observe(statsSection);
-        }
-        
-        // Add ripple effect to buttons
-        document.querySelectorAll('a[href]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                // Only add ripple to buttons, not all links
-                if (this.style.background && this.style.background.includes('#2563eb')) {
-                    const ripple = document.createElement('span');
-                    const rect = this.getBoundingClientRect();
-                    const size = Math.max(rect.width, rect.height);
-                    const x = e.clientX - rect.left - size / 2;
-                    const y = e.clientY - rect.top - size / 2;
-                    
-                    ripple.style.cssText = `
-                        position: absolute;
-                        width: ${size}px;
-                        height: ${size}px;
-                        left: ${x}px;
-                        top: ${y}px;
-                        background: rgba(255, 255, 255, 0.3);
-                        border-radius: 50%;
-                        transform: scale(0);
-                        animation: ripple 0.6s linear;
-                        pointer-events: none;
-                        z-index: 0;
-                    `;
-                    
-                    this.style.position = 'relative';
-                    this.appendChild(ripple);
-                    
-                    setTimeout(() => {
-                        ripple.remove();
-                    }, 600);
-                }
-            });
-        });
-        
-        // Add ripple animation
-        if (!document.querySelector('#ripple-styles')) {
-            const style = document.createElement('style');
-            style.id = 'ripple-styles';
-            style.textContent = `
-                @keyframes ripple {
-                    to {
-                        transform: scale(4);
-                        opacity: 0;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-    </script>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>

@@ -3,761 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Audio - Music Genre Classification</title>
+    <title>Upload Audio - Symphony AI Music Classifier</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body style="
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: #f8fafc;
-    min-height: 100vh;
-    padding-bottom: 50px;
-    color: #334155;
-    line-height: 1.6;
-">
-    <div class="container" style="margin-top: 3rem;">
-        <div class="row justify-content-center">
-            <div class="col-md-10 col-lg-8">
-                <!-- Header Section -->
-                <div style="
-                    text-align: center;
-                    margin-bottom: 2rem;
-                    animation: fadeInDown 0.8s ease-out;
-                ">
-                    <h1 style="
-                        font-size: 2.5rem;
-                        font-weight: 700;
-                        color: #1e293b;
-                        margin-bottom: 0.5rem;
-                    ">
-                        <i class="fas fa-cloud-upload-alt" style="color: #2563eb; margin-right: 10px;"></i>
-                        Upload Audio File
-                    </h1>
-                    <p style="
-                        font-size: 1.1rem;
-                        color: #64748b;
-                        margin: 0;
-                        font-weight: 400;
-                    ">Drag and drop your audio file or click to browse</p>
-                </div>
+<body>
 
-                <div style="
-                    background: white;
-                    border-radius: 20px;
-                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-                    border: 1px solid #e2e8f0;
-                    overflow: hidden;
-                    animation: scaleIn 0.8s ease-out 0.2s both;
-                ">
-                    <!-- Card Header -->
-                    <div style="
-                        background: #1e293b;
-                        color: white;
-                        padding: 2rem;
-                        text-align: center;
-                        border-bottom: 4px solid #2563eb;
-                    ">
-                        <h3 style="
-                            margin: 0 0 0.5rem 0;
-                            font-weight: 600;
-                            font-size: 1.5rem;
-                        ">
-                            <i class="fas fa-music" style="margin-right: 10px; color: #2563eb;"></i>
-                            AI Music Genre Classification
-                        </h3>
-                        <p style="
-                            margin: 0;
-                            color: #cbd5e1;
-                            font-size: 1rem;
-                        ">Advanced deep learning model for accurate genre identification</p>
-                    </div>
+    <!-- Processing Overlay -->
+    <div id="processingOverlay" class="processing-overlay">
+        <div class="loader-spinner mb-4"></div>
+        <h4 class="fw-bold text-white mb-2">Analyzing Audio Track</h4>
+        <p id="processingStatus" class="text-cyan-gradient fw-medium">Extracting 128-band Mel-Spectrogram matrix...</p>
+        <small class="text-dim">This typically takes 2-3 seconds</small>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar-custom">
+        <div class="container d-flex justify-content-between align-items-center">
+            <a href="/" class="navbar-brand">
+                <div class="brand-icon">
+                    <i class="fas fa-wave-square"></i>
+                </div>
+                <span>Symphony<span class="text-gradient">AI</span></span>
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <a href="/" class="nav-link-custom"><i class="fas fa-arrow-left me-1"></i> Back to Home</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="py-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
                     
-                    <div style="padding: 2.5rem;">
-                        <!-- Flash Messages -->
-                        {% with messages = get_flashed_messages() %}
-                            {% if messages %}
-                                {% for message in messages %}
-                                    <div style="
-                                        background: #fef3c7;
-                                        border: 1px solid #f59e0b;
-                                        color: #92400e;
-                                        padding: 1rem;
-                                        border-radius: 8px;
-                                        margin-bottom: 1.5rem;
-                                        border-left: 4px solid #f59e0b;
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 10px;
-                                    ">
-                                        <i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i>
-                                        {{ message }}
-                                        <button type="button" onclick="this.parentElement.style.display='none'" style="
-                                            margin-left: auto;
-                                            background: none;
-                                            border: none;
-                                            color: #92400e;
-                                            cursor: pointer;
-                                            font-size: 1.2rem;
-                                        ">&times;</button>
-                                    </div>
-                                {% endfor %}
-                            {% endif %}
-                        {% endwith %}
-                        
-                        <form action="{{ url_for('predict') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
-                            <!-- Upload Zone -->
-                            <div id="uploadZone" style="
-                                border: 3px dashed #cbd5e1;
-                                border-radius: 16px;
-                                padding: 3rem;
-                                text-align: center;
-                                background: #f8fafc;
-                                transition: all 0.3s ease;
-                                cursor: pointer;
-                                position: relative;
-                                overflow: hidden;
-                                margin-bottom: 1.5rem;
-                            " onmouseover="
-                                this.style.borderColor='#2563eb';
-                                this.style.background='#eff6ff';
-                                this.style.transform='scale(1.01)';
-                                this.querySelector('.upload-icon').style.color='#2563eb';
-                                this.querySelector('.upload-icon').style.transform='scale(1.1)';
-                            " onmouseout="
-                                this.style.borderColor='#cbd5e1';
-                                this.style.background='#f8fafc';
-                                this.style.transform='scale(1)';
-                                this.querySelector('.upload-icon').style.color='#64748b';
-                                this.querySelector('.upload-icon').style.transform='scale(1)';
-                            ">
-                                <input type="file" style="display: none;" id="file" name="file" 
-                                       accept=".wav,.mp3,.flac,.m4a,.ogg" required>
-                                
-                                <div class="upload-content">
-                                    <div class="upload-icon" style="
-                                        font-size: 4rem;
-                                        color: #64748b;
-                                        margin-bottom: 1.5rem;
-                                        transition: all 0.3s ease;
-                                    ">
-                                        <i class="fas fa-cloud-upload-alt"></i>
-                                    </div>
-                                    <h4 style="
-                                        font-size: 1.5rem;
-                                        font-weight: 600;
-                                        color: #1e293b;
-                                        margin-bottom: 0.5rem;
-                                    ">Drop your audio file here</h4>
-                                    <p style="
-                                        color: #64748b;
-                                        margin-bottom: 1rem;
-                                        font-size: 1rem;
-                                    ">or <strong style="color: #2563eb;">click to browse</strong></p>
-                                    <small style="
-                                        color: #64748b;
-                                        line-height: 1.6;
-                                        display: block;
-                                    ">
-                                        Supported formats: <strong>WAV, MP3, FLAC, M4A, OGG</strong><br>
-                                        Maximum file size: <strong>50MB</strong>
-                                    </small>
+                    <!-- Flash Messages -->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger alert-dismissible fade show mb-4 bg-dark text-danger border-danger" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i> {{ message }}
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
-                                
-                                <!-- Processing Overlay -->
-                                <div id="processingOverlay" style="
-                                    position: absolute;
-                                    top: 0;
-                                    left: 0;
-                                    right: 0;
-                                    bottom: 0;
-                                    background: rgba(255, 255, 255, 0.98);
-                                    display: none;
-                                    flex-direction: column;
-                                    justify-content: center;
-                                    align-items: center;
-                                    z-index: 1000;
-                                    backdrop-filter: blur(5px);
-                                ">
-                                    <div style="
-                                        width: 60px;
-                                        height: 60px;
-                                        border: 6px solid #e2e8f0;
-                                        border-top: 6px solid #2563eb;
-                                        border-radius: 50%;
-                                        animation: spin 1s linear infinite;
-                                        margin-bottom: 1.5rem;
-                                    "></div>
-                                    <h4 style="
-                                        color: #1e293b;
-                                        font-weight: 600;
-                                        margin-bottom: 1.5rem;
-                                    ">Processing Your Audio</h4>
-                                    <div style="
-                                        width: 100%;
-                                        max-width: 400px;
-                                        margin-bottom: 1.5rem;
-                                    ">
-                                        <div style="
-                                            height: 8px;
-                                            background: #e2e8f0;
-                                            border-radius: 4px;
-                                            overflow: hidden;
-                                        ">
-                                            <div id="progressBar" style="
-                                                height: 100%;
-                                                background: linear-gradient(90deg, #2563eb, #059669);
-                                                border-radius: 4px;
-                                                width: 0%;
-                                                transition: width 0.3s ease;
-                                                animation: progressShine 2s infinite;
-                                            "></div>
-                                        </div>
-                                    </div>
-                                    <div style="
-                                        text-align: left;
-                                        max-width: 350px;
-                                    ">
-                                        <div class="processing-step" id="step1" style="
-                                            display: flex;
-                                            align-items: center;
-                                            margin: 0.75rem 0;
-                                            opacity: 0.4;
-                                            transition: all 0.3s ease;
-                                            color: #64748b;
-                                        ">
-                                            <i class="fas fa-upload" style="margin-right: 12px; width: 20px;"></i>
-                                            <span>Uploading audio file...</span>
-                                        </div>
-                                        <div class="processing-step" id="step2" style="
-                                            display: flex;
-                                            align-items: center;
-                                            margin: 0.75rem 0;
-                                            opacity: 0.4;
-                                            transition: all 0.3s ease;
-                                            color: #64748b;
-                                        ">
-                                            <i class="fas fa-wave-square" style="margin-right: 12px; width: 20px;"></i>
-                                            <span>Extracting audio features...</span>
-                                        </div>
-                                        <div class="processing-step" id="step3" style="
-                                            display: flex;
-                                            align-items: center;
-                                            margin: 0.75rem 0;
-                                            opacity: 0.4;
-                                            transition: all 0.3s ease;
-                                            color: #64748b;
-                                        ">
-                                            <i class="fas fa-chart-line" style="margin-right: 12px; width: 20px;"></i>
-                                            <span>Generating spectrogram...</span>
-                                        </div>
-                                        <div class="processing-step" id="step4" style="
-                                            display: flex;
-                                            align-items: center;
-                                            margin: 0.75rem 0;
-                                            opacity: 0.4;
-                                            transition: all 0.3s ease;
-                                            color: #64748b;
-                                        ">
-                                            <i class="fas fa-brain" style="margin-right: 12px; width: 20px;"></i>
-                                            <span>Running AI classification...</span>
-                                        </div>
-                                        <div class="processing-step" id="step5" style="
-                                            display: flex;
-                                            align-items: center;
-                                            margin: 0.75rem 0;
-                                            opacity: 0.4;
-                                            transition: all 0.3s ease;
-                                            color: #64748b;
-                                        ">
-                                            <i class="fas fa-check" style="margin-right: 12px; width: 20px;"></i>
-                                            <span>Preparing results...</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <span class="badge-blues genre-badge mb-2"><i class="fas fa-bolt"></i> Real-time Inference</span>
+                        <h2 class="display-6 fw-bold" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                            Upload Music File for <span class="text-gradient">AI Analysis</span>
+                        </h2>
+                        <p class="text-muted">
+                            Supports audio formats: <strong>.WAV, .MP3, .FLAC, .OGG, .M4A</strong> (up to 100MB)
+                        </p>
+                    </div>
+
+                    <!-- Upload Form Card -->
+                    <div class="glass-card mb-4">
+                        <form id="uploadForm" action="/predict" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="sample_name" id="sampleNameInput" value="">
                             
-                            <!-- File Preview -->
-                            <div id="filePreview" style="
-                                display: none;
-                                background: #f0fdf4;
-                                border: 2px solid #059669;
-                                border-radius: 12px;
-                                padding: 1.5rem;
-                                margin-bottom: 1.5rem;
-                                animation: slideInUp 0.5s ease-out;
-                            ">
-                                <div style="
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: space-between;
-                                    flex-wrap: wrap;
-                                    gap: 15px;
-                                    margin-bottom: 1rem;
-                                ">
-                                    <div style="
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 15px;
-                                    ">
-                                        <i class="fas fa-file-audio" style="
-                                            font-size: 2.5rem;
-                                            color: #059669;
-                                        "></i>
+                            <!-- Dropzone Area -->
+                            <div id="dropzone" class="dropzone-container mb-4" onclick="document.getElementById('fileInput').click();">
+                                <input type="file" id="fileInput" name="file" accept=".wav,.mp3,.flac,.ogg,.m4a" style="display: none;">
+                                <div class="dropzone-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h5 class="fw-bold mb-2">Drag & Drop Your Audio Track Here</h5>
+                                <p class="text-muted small mb-0">or <span class="text-primary fw-semibold">click to browse</span> from your device</p>
+                            </div>
+
+                            <!-- Selected File Preview Card -->
+                            <div id="selectedFileCard" class="glass-card p-3 mb-4" style="display: none; background: rgba(15, 23, 42, 0.9);">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="brand-icon" style="width: 36px; height: 36px; font-size: 1rem;">
+                                            <i class="fas fa-music"></i>
+                                        </div>
                                         <div>
-                                            <div id="fileName" style="
-                                                font-weight: 600;
-                                                color: #1e293b;
-                                                font-size: 1.1rem;
-                                                margin-bottom: 0.25rem;
-                                            "></div>
-                                            <small style="
-                                                color: #64748b;
-                                                display: block;
-                                            ">
-                                                Size: <span id="fileSize"></span> | 
-                                                Duration: <span id="fileDuration">Calculating...</span>
-                                            </small>
+                                            <h6 id="selectedFileName" class="mb-0 fw-bold">audio.wav</h6>
+                                            <small id="selectedFileSize" class="text-dim">3.2 MB</small>
                                         </div>
                                     </div>
-                                    <button type="button" id="removeFile" style="
-                                        background: transparent;
-                                        border: 2px solid #dc2626;
-                                        color: #dc2626;
-                                        padding: 8px 16px;
-                                        border-radius: 8px;
-                                        font-size: 0.9rem;
-                                        font-weight: 500;
-                                        cursor: pointer;
-                                        transition: all 0.3s ease;
-                                        display: flex;
-                                        align-items: center;
-                                        gap: 6px;
-                                    " onmouseover="
-                                        this.style.background='#dc2626';
-                                        this.style.color='white';
-                                    " onmouseout="
-                                        this.style.background='transparent';
-                                        this.style.color='#dc2626';
-                                    ">
-                                        <i class="fas fa-trash"></i> Remove
-                                    </button>
+                                    <span class="badge bg-success"><i class="fas fa-check"></i> Ready</span>
                                 </div>
-                                
-                                <div id="audioVisualization" style="
-                                    height: 60px;
-                                    background: linear-gradient(90deg, #2563eb, #059669);
-                                    border-radius: 8px;
-                                    position: relative;
-                                    overflow: hidden;
-                                ">
-                                    <div id="audioWaves" style="
-                                        position: absolute;
-                                        width: 100%;
-                                        height: 100%;
-                                        opacity: 0.3;
-                                    "></div>
-                                </div>
+
+                                <!-- In-browser audio player preview -->
+                                <audio id="previewAudioPlayer" controls class="w-100 mt-2" style="display: none; height: 36px;">
+                                    <source id="previewAudioSource" src="" type="audio/wav">
+                                </audio>
                             </div>
-                            
-                            <!-- Error Message -->
-                            <div id="errorMessage" style="
-                                background: #fef2f2;
-                                border: 1px solid #fecaca;
-                                color: #dc2626;
-                                padding: 1rem;
-                                border-radius: 8px;
-                                margin-bottom: 1.5rem;
-                                display: none;
-                                border-left: 4px solid #dc2626;
-                            "></div>
-                            
-                            <!-- AI Info Section -->
-                            <div style="
-                                background: #eff6ff;
-                                border-left: 4px solid #2563eb;
-                                padding: 1.5rem;
-                                margin: 1.5rem 0;
-                                border-radius: 0 8px 8px 0;
-                            ">
-                                <h6 style="
-                                    color: #1e293b;
-                                    margin-bottom: 0.75rem;
-                                    font-weight: 600;
-                                    display: flex;
-                                    align-items: center;
-                                    gap: 8px;
-                                ">
-                                    <i class="fas fa-brain" style="color: #2563eb;"></i>
-                                    AI Classification System
-                                </h6>
-                                <p style="
-                                    margin: 0;
-                                    color: #64748b;
-                                    line-height: 1.6;
-                                ">
-                                    Our advanced CNN deep learning model analyzes audio spectrograms to classify music into 
-                                    <strong>10 distinct genres</strong>: Blues, Classical, Country, Disco, Hip-hop, Jazz, Metal, Pop, Reggae, and Rock.
-                                    <br><small style="margin-top: 0.5rem; display: block; color: #2563eb; font-weight: 500;">
-                                        ✓ 85% accuracy rate • ✓ Real-time processing • ✓ Detailed confidence scores
-                                    </small>
-                                </p>
-                            </div>
-                            
+
                             <!-- Submit Button -->
-                            <div style="margin-bottom: 1.5rem;">
-                                <button type="submit" id="submitBtn" disabled style="
-                                    width: 100%;
-                                    background: #2563eb;
-                                    color: white;
-                                    border: none;
-                                    padding: 1rem 2rem;
-                                    border-radius: 12px;
-                                    font-size: 1.1rem;
-                                    font-weight: 600;
-                                    cursor: pointer;
-                                    transition: all 0.3s ease;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    gap: 10px;
-                                    opacity: 0.5;
-                                " onmouseover="
-                                    if (!this.disabled) {
-                                        this.style.background='#1d4ed8';
-                                        this.style.transform='translateY(-2px)';
-                                        this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.3)';
-                                    }
-                                " onmouseout="
-                                    if (!this.disabled) {
-                                        this.style.background='#2563eb';
-                                        this.style.transform='translateY(0)';
-                                        this.style.boxShadow='none';
-                                    }
-                                ">
-                                    <i class="fas fa-magic"></i>
-                                    Classify Genre with AI
+                            <div class="d-grid">
+                                <button type="submit" id="submitBtn" class="btn-primary-glow justify-content-center py-3" disabled>
+                                    <i class="fas fa-bolt"></i>
+                                    <span>Run Genre Classification & Visualization</span>
                                 </button>
                             </div>
                         </form>
-                        
-                        <!-- Back Button -->
-                        <div style="text-align: center;">
-                            <a href="{{ url_for('index') }}" style="
-                                display: inline-flex;
-                                align-items: center;
-                                gap: 8px;
-                                color: #64748b;
-                                text-decoration: none;
-                                font-weight: 500;
-                                transition: all 0.3s ease;
-                                padding: 0.75rem 1.5rem;
-                                border-radius: 8px;
-                            " onmouseover="
-                                this.style.color='#2563eb';
-                                this.style.background='#eff6ff';
-                            " onmouseout="
-                                this.style.color='#64748b';
-                                this.style.background='transparent';
-                            ">
-                                <i class="fas fa-arrow-left"></i>
-                                Back to Home
-                            </a>
+                    </div>
+
+                    <!-- 1-Click Sample Preset Card -->
+                    <div class="glass-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="fw-bold mb-0 text-secondary">
+                                <i class="fas fa-flask text-primary me-2"></i> Or Try GTZAN Dataset Benchmark Samples:
+                            </h6>
+                            <span class="small text-dim">1-Click Instant Run</span>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-3">
+                                <button type="button" class="btn-sample w-100 justify-content-center" onclick="selectPresetSample('reggae.00036.wav', 'Reggae')">
+                                    <i class="fas fa-play text-success"></i> Reggae 36
+                                </button>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <button type="button" class="btn-sample w-100 justify-content-center" onclick="selectPresetSample('metal.00036.wav', 'Metal')">
+                                    <i class="fas fa-play text-danger"></i> Metal 36
+                                </button>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <button type="button" class="btn-sample w-100 justify-content-center" onclick="selectPresetSample('classical.00036.wav', 'Classical')">
+                                    <i class="fas fa-play text-warning"></i> Classical 36
+                                </button>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <button type="button" class="btn-sample w-100 justify-content-center" onclick="selectPresetSample('pop.00019.wav', 'Pop')">
+                                    <i class="fas fa-play text-info"></i> Pop 19
+                                </button>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
-    </div>
-    
-    <style>
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        @keyframes fadeInDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-        
-        @keyframes slideInUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        @keyframes progressShine {
-            0% { background-position: -200px 0; }
-            100% { background-position: 200px 0; }
-        }
-        
-        @keyframes wave-animation {
-            0%, 100% { height: 20%; }
-            50% { height: 80%; }
-        }
-        
-        .wave {
-            position: absolute;
-            width: 4px;
-            background: white;
-            border-radius: 2px;
-            animation: wave-animation 1.5s infinite ease-in-out;
-        }
-        
-        .dragover {
-            border-color: #059669 !important;
-            background: #f0fdf4 !important;
-            transform: scale(1.02) !important;
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            
-            body {
-                padding-bottom: 2rem;
-            }
-        }
-    </style>
-    
-    <script>
-        class AudioUploader {
-            constructor() {
-                this.uploadZone = document.getElementById('uploadZone');
-                this.fileInput = document.getElementById('file');
-                this.filePreview = document.getElementById('filePreview');
-                this.submitBtn = document.getElementById('submitBtn');
-                this.uploadForm = document.getElementById('uploadForm');
-                this.processingOverlay = document.getElementById('processingOverlay');
-                this.progressBar = document.getElementById('progressBar');
-                this.errorMessage = document.getElementById('errorMessage');
-                
-                this.initEventListeners();
-                this.generateAudioWaves();
-            }
-            
-            initEventListeners() {
-                // Drag and drop events
-                this.uploadZone.addEventListener('click', () => this.fileInput.click());
-                this.uploadZone.addEventListener('dragover', (e) => this.handleDragOver(e));
-                this.uploadZone.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-                this.uploadZone.addEventListener('drop', (e) => this.handleDrop(e));
-                
-                // File input change
-                this.fileInput.addEventListener('change', (e) => this.handleFileSelect(e));
-                
-                // Remove file
-                document.getElementById('removeFile').addEventListener('click', () => this.removeFile());
-                
-                // Form submission
-                this.uploadForm.addEventListener('submit', (e) => this.handleSubmit(e));
-            }
-            
-            handleDragOver(e) {
-                e.preventDefault();
-                this.uploadZone.classList.add('dragover');
-            }
-            
-            handleDragLeave(e) {
-                e.preventDefault();
-                this.uploadZone.classList.remove('dragover');
-            }
-            
-            handleDrop(e) {
-                e.preventDefault();
-                this.uploadZone.classList.remove('dragover');
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    this.fileInput.files = files;
-                    this.handleFileSelect({ target: { files } });
-                }
-            }
-            
-            handleFileSelect(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                this.hideError();
-                
-                // Validate file
-                if (!this.validateFile(file)) return;
-                
-                // Show file preview
-                this.showFilePreview(file);
-            }
-            
-            validateFile(file) {
-                const maxSize = 50 * 1024 * 1024; // 50MB
-                
-                if (file.size > maxSize) {
-                    this.showError('File size must be less than 50MB');
-                    return false;
-                }
-                
-                const fileExtension = file.name.split('.').pop().toLowerCase();
-                const allowedExtensions = ['wav', 'mp3', 'flac', 'm4a', 'ogg'];
-                
-                if (!allowedExtensions.includes(fileExtension)) {
-                    this.showError('Please select a valid audio file (WAV, MP3, FLAC, M4A, OGG)');
-                    return false;
-                }
-                
-                return true;
-            }
-            
-            showFilePreview(file) {
-                document.getElementById('fileName').textContent = file.name;
-                document.getElementById('fileSize').textContent = this.formatFileSize(file.size);
-                
-                // Calculate duration if possible
-                this.calculateDuration(file);
-                
-                this.filePreview.style.display = 'block';
-                this.submitBtn.disabled = false;
-                this.submitBtn.style.opacity = '1';
-                this.submitBtn.style.cursor = 'pointer';
-                
-                // Animate audio visualization
-                this.animateAudioWaves();
-            }
-            
-            calculateDuration(file) {
-                const audio = new Audio();
-                const url = URL.createObjectURL(file);
-                
-                audio.addEventListener('loadedmetadata', () => {
-                    const duration = audio.duration;
-                    const minutes = Math.floor(duration / 60);
-                    const seconds = Math.floor(duration % 60);
-                    document.getElementById('fileDuration').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    URL.revokeObjectURL(url);
-                });
-                
-                audio.addEventListener('error', () => {
-                    document.getElementById('fileDuration').textContent = 'Unknown';
-                    URL.revokeObjectURL(url);
-                });
-                
-                audio.src = url;
-            }
-            
-            removeFile() {
-                this.fileInput.value = '';
-                this.filePreview.style.display = 'none';
-                this.submitBtn.disabled = true;
-                this.submitBtn.style.opacity = '0.5';
-                this.submitBtn.style.cursor = 'not-allowed';
-                this.hideError();
-            }
-            
-            formatFileSize(bytes) {
-                if (bytes === 0) return '0 Bytes';
-                const k = 1024;
-                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-                const i = Math.floor(Math.log(bytes) / Math.log(k));
-                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-            }
-            
-            showError(message) {
-                this.errorMessage.textContent = message;
-                this.errorMessage.style.display = 'block';
-            }
-            
-            hideError() {
-                this.errorMessage.style.display = 'none';
-            }
-            
-            handleSubmit(e) {
-                e.preventDefault();
-                
-                if (!this.fileInput.files[0]) {
-                    this.showError('Please select a file');
-                    return;
-                }
-                
-                this.startProcessing();
-                
-                // Submit form after showing processing animation
-                setTimeout(() => {
-                    this.uploadForm.submit();
-                }, 1000);
-            }
-            
-            startProcessing() {
-                this.processingOverlay.style.display = 'flex';
-                this.simulateProcessing();
-            }
-            
-            simulateProcessing() {
-                const steps = ['step1', 'step2', 'step3', 'step4', 'step5'];
-                let currentStep = 0;
-                let progress = 0;
-                
-                const interval = setInterval(() => {
-                    // Update progress bar
-                    progress += Math.random() * 15 + 5;
-                    if (progress > 100) progress = 100;
-                    this.progressBar.style.width = progress + '%';
-                    
-                    // Update steps
-                    if (currentStep < steps.length) {
-                        // Complete previous step
-                        if (currentStep > 0) {
-                            const prevStep = document.getElementById(steps[currentStep - 1]);
-                            prevStep.style.opacity = '1';
-                            prevStep.style.color = '#059669';
-                            prevStep.querySelector('i').className = 'fas fa-check';
-                        }
-                        
-                        // Activate current step
-                        const currentStepEl = document.getElementById(steps[currentStep]);
-                        currentStepEl.style.opacity = '1';
-                        currentStepEl.style.color = '#2563eb';
-                        currentStep++;
-                    }
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        // Form will submit and redirect
-                    }
-                }, 800);
-            }
-            
-            generateAudioWaves() {
-                const waveContainer = document.getElementById('audioWaves');
-                waveContainer.innerHTML = '';
-                for (let i = 0; i < 20; i++) {
-                    const wave = document.createElement('div');
-                    wave.className = 'wave';
-                    wave.style.left = `${i * 5}%`;
-                    wave.style.animationDelay = `${i * 0.1}s`;
-                    waveContainer.appendChild(wave);
-                }
-            }
-            
-            animateAudioWaves() {
-                const waves = document.querySelectorAll('.wave');
-                waves.forEach((wave, index) => {
-                    wave.style.animationDelay = `${index * 0.1}s`;
-                    wave.style.animation = 'wave-animation 1.5s infinite ease-in-out';
-                });
-            }
-        }
-        
-        // Initialize when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            new AudioUploader();
-        });
-    </script>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center text-dim">
+            Symphony AI • Real-time Music Genre Classification & Audio Intelligence
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
 </html>
