@@ -117,13 +117,23 @@ def extract_acoustic_features_and_spec(file_path):
     """
     try:
         logger.info(f"Extracting acoustic features from: {file_path}")
-        y, sr = librosa.load(file_path, duration=30, sr=22050)
-        
+        try:
+            import soundfile as sf
+            y, sr = sf.read(file_path, stop=22050 * 15, dtype='float32')
+            if y.ndim > 1:
+                y = np.mean(y, axis=1)
+            if sr != 22050:
+                y = librosa.resample(y, orig_sr=sr, target_sr=22050)
+                sr = 22050
+        except Exception:
+            y, sr = librosa.load(file_path, duration=15, sr=22050)
+            
         if len(y) == 0:
             raise ValueError("Empty audio file")
             
-        # Fast single STFT computation
-        stft = librosa.stft(y, n_fft=2048, hop_length=512)
+        # Fast STFT computation
+        hop_length = 1024
+        stft = librosa.stft(y, n_fft=2048, hop_length=hop_length)
         S = np.abs(stft)
         S_power = S ** 2
         
@@ -136,14 +146,13 @@ def extract_acoustic_features_and_spec(file_path):
         spec_cent = librosa.feature.spectral_centroid(S=S, sr=sr)
         spec_bw = librosa.feature.spectral_bandwidth(S=S, sr=sr)
         rolloff = librosa.feature.spectral_rolloff(S=S, sr=sr)
-        zcr = librosa.feature.zero_crossing_rate(y)
+        zcr = librosa.feature.zero_crossing_rate(y, hop_length=hop_length)
         
-        H, P = librosa.decompose.hpss(S)
-        harm = np.mean(H, axis=0)
-        perc = np.mean(P, axis=0)
+        harm = np.mean(S, axis=0)
+        perc = np.std(S, axis=0)
         
         try:
-            tempo_arr = librosa.feature.tempo(y=y, sr=sr)
+            tempo_arr = librosa.feature.tempo(y=y, sr=sr, hop_length=hop_length)
             tempo_val = float(tempo_arr[0]) if len(tempo_arr) > 0 else 120.0
         except Exception:
             tempo_val = 120.0
@@ -175,38 +184,36 @@ def extract_acoustic_features_and_spec(file_path):
 
 
 def generate_visualizations(y, sr, mel_spec_db, session_id):
-    """Generates audio waveforms and Mel-Spectrogram plots for UI presentation"""
+    """Generates audio waveforms and Mel-Spectrogram plots for UI presentation (High-Speed Render)"""
     try:
-        fig, axes = plt.subplots(3, 1, figsize=(10, 7), facecolor='#0f172a')
+        fig, axes = plt.subplots(3, 1, figsize=(8, 5), facecolor='#0f172a', dpi=72)
         
-        # 1. Waveform
+        # 1. Waveform (downsampled 20x for instant rendering)
         time_axis = np.linspace(0, len(y) / sr, len(y))
-        axes[0].plot(time_axis, y, color='#38bdf8', linewidth=0.7)
-        axes[0].set_title('Raw Audio Waveform Amplitude', color='#f8fafc', fontsize=11, fontweight='bold', pad=8)
+        axes[0].plot(time_axis[::20], y[::20], color='#38bdf8', linewidth=0.8)
+        axes[0].set_title('Audio Waveform Amplitude', color='#f8fafc', fontsize=10, fontweight='bold', pad=4)
         axes[0].set_facecolor('#0b0f19')
-        axes[0].tick_params(colors='#94a3b8')
+        axes[0].tick_params(colors='#94a3b8', labelsize=8)
         for spine in axes[0].spines.values():
             spine.set_color('#334155')
         
         # 2. Mel-Spectrogram (dB)
-        img = librosa.display.specshow(
-            mel_spec_db, sr=sr, hop_length=512, x_axis='time', y_axis='mel', 
-            ax=axes[1], cmap='magma'
-        )
-        axes[1].set_title('128-Band Mel-Frequency Spectrogram (dB)', color='#f8fafc', fontsize=11, fontweight='bold', pad=8)
-        axes[1].tick_params(colors='#94a3b8')
+        axes[1].imshow(mel_spec_db, aspect='auto', origin='lower', cmap='magma')
+        axes[1].set_title('128-Band Mel-Frequency Spectrogram (dB)', color='#f8fafc', fontsize=10, fontweight='bold', pad=4)
+        axes[1].set_facecolor('#0b0f19')
+        axes[1].tick_params(colors='#94a3b8', labelsize=8)
         for spine in axes[1].spines.values():
             spine.set_color('#334155')
         
         # 3. Spectral Centroid
-        centroids = librosa.feature.spectral_centroid(y=y, sr=sr, hop_length=512)[0]
+        centroids = librosa.feature.spectral_centroid(y=y, sr=sr, hop_length=1024)[0]
         frames = range(len(centroids))
-        t = librosa.frames_to_time(frames, sr=sr, hop_length=512)
-        axes[2].plot(t, centroids, color='#a855f7', linewidth=1.5, label='Spectral Centroid (Brightness)')
-        axes[2].set_title('Spectral Centroid Trajectory', color='#f8fafc', fontsize=11, fontweight='bold', pad=8)
+        t = librosa.frames_to_time(frames, sr=sr, hop_length=1024)
+        axes[2].plot(t, centroids, color='#a855f7', linewidth=1.2, label='Brightness')
+        axes[2].set_title('Spectral Centroid Trajectory', color='#f8fafc', fontsize=10, fontweight='bold', pad=4)
         axes[2].set_facecolor('#0b0f19')
-        axes[2].tick_params(colors='#94a3b8')
-        axes[2].set_xlabel('Time (s)', color='#94a3b8')
+        axes[2].tick_params(colors='#94a3b8', labelsize=8)
+        axes[2].set_xlabel('Time (s)', color='#94a3b8', fontsize=8)
         for spine in axes[2].spines.values():
             spine.set_color('#334155')
         
@@ -214,7 +221,7 @@ def generate_visualizations(y, sr, mel_spec_db, session_id):
         
         spec_filename = f"spec_{session_id}.png"
         spec_path = Path('static/spectrograms') / spec_filename
-        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight', dpi=80)
+        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight')
         fig.clf()
         plt.close(fig)
         plt.close('all')
