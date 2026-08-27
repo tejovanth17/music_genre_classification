@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,9 +44,9 @@
             <div class="row align-items-center g-5">
                 <div class="col-lg-7 text-start">
                     <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4" 
-                         style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3);">
+                         style="background: var(--primary-light); border: 1px solid var(--primary);">
                         <span class="pulse-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--primary);"></span>
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Powered by TensorFlow & Librosa</span>
+                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--primary);">Powered by TensorFlow, PyTorch & Librosa</span>
                     </div>
                     <h1 class="display-4 fw-bold mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                         Deep Audio AI for <br>
@@ -62,12 +62,12 @@
                         </a>
                         <a href="#benchmarks" class="btn-secondary-glass">
                             <i class="fas fa-chart-bar"></i>
-                            <span>View Model Benchmarks</span>
+                            <span>View SOTA Benchmarks</span>
                         </a>
                     </div>
 
                     <!-- Metrics Badges -->
-                    <div class="row mt-5 pt-3 g-4 border-top" style="border-color: var(--border-subtle) !important;">
+                    <div class="row mt-5 pt-3 g-4 border-top" style="border-color: var(--border-default) !important;">
                         <div class="col-4">
                             <h3 class="fw-bold mb-0 text-cyan-gradient">10</h3>
                             <p class="text-muted small mb-0">GTZAN Genres</p>
@@ -77,8 +77,8 @@
                             <p class="text-muted small mb-0">Audio Segments</p>
                         </div>
                         <div class="col-4">
-                            <h3 class="fw-bold mb-0" style="color: var(--accent-emerald);">~90%</h3>
-                            <p class="text-muted small mb-0">Top Accuracy</p>
+                            <h3 class="fw-bold mb-0" style="color: var(--success);">91.2%</h3>
+                            <p class="text-muted small mb-0">Top Accuracy (LightGBM)</p>
                         </div>
                     </div>
                 </div>
@@ -102,13 +102,11 @@
                         </div>
 
                         <!-- Live Spectrogram Simulator -->
-                        <div class="position-relative rounded-3 overflow-hidden mb-3" 
-                             style="height: 180px; background: linear-gradient(180deg, #1e1b4b 0%, #0f172a 100%); border: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center;">
-                            <div style="text-align: center;">
-                                <i class="fas fa-wave-square mb-2" style="font-size: 2.5rem; color: var(--accent-cyan);"></i>
-                                <p class="small text-muted mb-0">128-Band Mel Spectrogram Extraction</p>
-                                <span class="badge bg-dark border border-secondary mt-1">22,050 Hz • 30s FFT</span>
-                            </div>
+                        <div class="position-relative rounded-3 overflow-hidden mb-3 p-4 text-center" 
+                             style="height: 170px; background: var(--bg-surface-elevated); border: 1px solid var(--border-default); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <i class="fas fa-wave-square mb-2" style="font-size: 2.2rem; color: var(--primary);"></i>
+                            <h6 class="fw-bold mb-1 text-primary">128-Band Mel Spectrogram Matrix</h6>
+                            <small class="text-muted">22,050 Hz Sampling • 30s FFT Window (Hop 512)</small>
                         </div>
 
                         <!-- Quick Test Presets -->
@@ -146,71 +144,71 @@
 
             <div class="row g-3 justify-content-center">
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-guitar mb-2" style="font-size: 1.5rem; color: #60A5FA;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-guitar mb-2" style="font-size: 1.5rem; color: #2563EB;"></i>
                         <h6 class="mb-0">Blues</h6>
                         <small class="text-dim">12-bar & slides</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-compact-disc mb-2" style="font-size: 1.5rem; color: #FACC15;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-compact-disc mb-2" style="font-size: 1.5rem; color: #D97706;"></i>
                         <h6 class="mb-0">Classical</h6>
                         <small class="text-dim">Orchestral</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-hat-cowboy mb-2" style="font-size: 1.5rem; color: #F59E0B;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-hat-cowboy mb-2" style="font-size: 1.5rem; color: #EA580C;"></i>
                         <h6 class="mb-0">Country</h6>
                         <small class="text-dim">Acoustic & twang</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-record-vinyl mb-2" style="font-size: 1.5rem; color: #F472B6;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-record-vinyl mb-2" style="font-size: 1.5rem; color: #DB2777;"></i>
                         <h6 class="mb-0">Disco</h6>
                         <small class="text-dim">Four-on-floor</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-microphone-alt mb-2" style="font-size: 1.5rem; color: #C084FC;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-microphone-alt mb-2" style="font-size: 1.5rem; color: #9333EA;"></i>
                         <h6 class="mb-0">Hip Hop</h6>
                         <small class="text-dim">808s & syncopation</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-saxophone mb-2" style="font-size: 1.5rem; color: #2DD4BF;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-music mb-2" style="font-size: 1.5rem; color: #0D9488;"></i>
                         <h6 class="mb-0">Jazz</h6>
                         <small class="text-dim">Improv & swing</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-bolt mb-2" style="font-size: 1.5rem; color: #F87171;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-bolt mb-2" style="font-size: 1.5rem; color: #DC2626;"></i>
                         <h6 class="mb-0">Metal</h6>
-                        <small class="text-dim">Distortion & double-kick</small>
+                        <small class="text-dim">Distortion & kick</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-headphones-alt mb-2" style="font-size: 1.5rem; color: #FB7185;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-headphones-alt mb-2" style="font-size: 1.5rem; color: #E11D48;"></i>
                         <h6 class="mb-0">Pop</h6>
-                        <small class="text-dim">Catchy vocal hooks</small>
+                        <small class="text-dim">Vocal hooks</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-drum mb-2" style="font-size: 1.5rem; color: #4ADE80;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-drum mb-2" style="font-size: 1.5rem; color: #16A34A;"></i>
                         <h6 class="mb-0">Reggae</h6>
                         <small class="text-dim">Offbeat skank</small>
                     </div>
                 </div>
                 <div class="col-6 col-md-4 col-lg-2">
-                    <div class="glass-card text-center p-3">
-                        <i class="fas fa-volume-up mb-2" style="font-size: 1.5rem; color: #A855F7;"></i>
+                    <div class="glass-card text-center p-3 h-100">
+                        <i class="fas fa-volume-up mb-2" style="font-size: 1.5rem; color: #7C3AED;"></i>
                         <h6 class="mb-0">Rock</h6>
                         <small class="text-dim">Overdriven riffs</small>
                     </div>
@@ -223,7 +221,7 @@
     <section id="benchmarks" class="py-5">
         <div class="container">
             <div class="glass-card">
-                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
                     <div>
                         <span class="text-cyan-gradient fw-bold text-uppercase small">SOTA Benchmarking Suite</span>
                         <h3 class="fw-bold mt-1 mb-0">Model Performance Leaderboard</h3>
@@ -246,7 +244,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr style="background: rgba(16, 185, 129, 0.05);">
+                            <tr style="background: var(--success-bg);">
                                 <td><i class="fas fa-crown text-warning me-2"></i> <strong>LightGBM Classifier</strong></td>
                                 <td><span class="badge bg-success">SOTA GBDT Tree</span></td>
                                 <td><strong class="text-success" style="font-size: 1rem;">91.19%</strong></td>
@@ -344,7 +342,7 @@
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="glass-card h-100">
-                        <div class="brand-icon mb-3" style="background: var(--grad-cyan);">
+                        <div class="brand-icon mb-3" style="background-color: var(--info);">
                             <i class="fas fa-file-audio"></i>
                         </div>
                         <h5 class="fw-bold">1. Acoustic Ingestion</h5>
@@ -355,7 +353,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="glass-card h-100">
-                        <div class="brand-icon mb-3" style="background: var(--grad-primary);">
+                        <div class="brand-icon mb-3" style="background-color: var(--primary);">
                             <i class="fas fa-brain"></i>
                         </div>
                         <h5 class="fw-bold">2. Feature Extraction</h5>
@@ -366,7 +364,7 @@
                 </div>
                 <div class="col-md-4">
                     <div class="glass-card h-100">
-                        <div class="brand-icon mb-3" style="background: linear-gradient(135deg, #10B981, #06B6D4);">
+                        <div class="brand-icon mb-3" style="background-color: var(--success);">
                             <i class="fas fa-chart-pie"></i>
                         </div>
                         <h5 class="fw-bold">3. Prediction & Recommender</h5>
@@ -384,11 +382,11 @@
         <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
             <div class="d-flex align-items-center gap-2">
                 <i class="fas fa-wave-square text-primary"></i>
-                <span class="fw-bold text-white">Symphony AI</span>
+                <span class="fw-bold text-primary">Symphony AI</span>
                 <span class="text-dim">• Music Genre Classification & Audio Intelligence</span>
             </div>
             <div class="text-dim">
-                Built with TensorFlow, Librosa, Scikit-Learn & Flask
+                Built with TensorFlow, PyTorch, Librosa, Scikit-Learn & Flask
             </div>
         </div>
     </footer>
