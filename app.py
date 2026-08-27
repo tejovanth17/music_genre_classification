@@ -213,7 +213,10 @@ def generate_visualizations(y, sr, mel_spec_db, session_id):
         plt.tight_layout()
         
         spec_filename = f"spec_{session_id}.png"
-        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight', dpi=100)
+        spec_path = Path('static/spectrograms') / spec_filename
+        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight', dpi=80)
+        fig.clf()
+        plt.close(fig)
         plt.close('all')
         del fig, axes
         import gc
