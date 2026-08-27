@@ -122,25 +122,33 @@ def extract_acoustic_features_and_spec(file_path):
         if len(y) == 0:
             raise ValueError("Empty audio file")
             
-        chroma_stft = librosa.feature.chroma_stft(y=y, sr=sr)
-        rms = librosa.feature.rms(y=y)
-        spec_cent = librosa.feature.spectral_centroid(y=y, sr=sr)
-        spec_bw = librosa.feature.spectral_bandwidth(y=y, sr=sr)
-        rolloff = librosa.feature.spectral_rolloff(y=y, sr=sr)
+        # Fast single STFT computation
+        stft = librosa.stft(y, n_fft=2048, hop_length=512)
+        S = np.abs(stft)
+        S_power = S ** 2
+        
+        # 128-band Mel Spectrogram
+        mel_spec = librosa.feature.melspectrogram(S=S_power, sr=sr, n_mels=128)
+        mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
+        
+        chroma_stft = librosa.feature.chroma_stft(S=S_power, sr=sr)
+        rms = librosa.feature.rms(S=S)
+        spec_cent = librosa.feature.spectral_centroid(S=S, sr=sr)
+        spec_bw = librosa.feature.spectral_bandwidth(S=S, sr=sr)
+        rolloff = librosa.feature.spectral_rolloff(S=S, sr=sr)
         zcr = librosa.feature.zero_crossing_rate(y)
-        harm, perc = librosa.effects.hpss(y)
+        
+        H, P = librosa.decompose.hpss(S)
+        harm = np.mean(H, axis=0)
+        perc = np.mean(P, axis=0)
         
         try:
-            tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
-            tempo_val = float(tempo[0]) if isinstance(tempo, (list, np.ndarray)) else float(tempo)
+            tempo_arr = librosa.feature.tempo(y=y, sr=sr)
+            tempo_val = float(tempo_arr[0]) if len(tempo_arr) > 0 else 120.0
         except Exception:
             tempo_val = 120.0
             
-        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
-        
-        # 128-band Mel Spectrogram for spectrum visualization
-        mel_spec = librosa.feature.melspectrogram(y=y, sr=sr, n_fft=2048, hop_length=512, n_mels=128)
-        mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
+        mfcc = librosa.feature.mfcc(S=mel_spec_db, n_mfcc=20)
         
         feats = {
             'chroma_stft_mean': float(np.mean(chroma_stft)), 'chroma_stft_var': float(np.var(chroma_stft)),
@@ -302,7 +310,7 @@ def predict_sample(sample_name):
         recommendations = []
         if rec_engine:
             try:
-                recs_df = rec_engine.recommend(sample_name, top_n=3)
+                recs_df = rec_engine.recommend(sample_name, genre_hint=predicted_genre, top_n=3)
                 recommendations = recs_df.to_dict(orient='records')
             except Exception as e:
                 logger.warning(f"Recommender query error: {e}")
@@ -388,7 +396,7 @@ def predict():
             recommendations = []
             if rec_engine:
                 try:
-                    recs_df = rec_engine.recommend(filename, top_n=3)
+                    recs_df = rec_engine.recommend(filename, genre_hint=predicted_genre, top_n=3)
                     recommendations = recs_df.to_dict(orient='records')
                 except Exception as e:
                     logger.warning(f"Recommender query note: {e}")
