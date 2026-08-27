@@ -205,13 +205,16 @@ def generate_visualizations(y, sr, mel_spec_db, session_id):
         plt.tight_layout()
         
         spec_filename = f"spec_{session_id}.png"
-        spec_path = Path('static/spectrograms') / spec_filename
-        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight', dpi=120)
-        plt.close(fig)
+        plt.savefig(spec_path, facecolor=fig.get_facecolor(), edgecolor='none', bbox_inches='tight', dpi=100)
+        plt.close('all')
+        del fig, axes
+        import gc
+        gc.collect()
         
         return f"spectrograms/{spec_filename}"
         
     except Exception as e:
+        plt.close('all')
         logger.error(f"Error generating visualizations: {e}")
         return None
 
