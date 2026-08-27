@@ -1,0 +1,27 @@
+# Python bytecode & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Application Logs & Cache
+*.log
+app.log
+
+# Generated session visualizations & temporary files
+static/spectrograms/*.png
+static/waveforms/*.png
+!static/spectrograms/.gitkeep
+!static/waveforms/.gitkeep
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Large dataset files (GTZAN dataset audio and raw images)
+Music_Data/

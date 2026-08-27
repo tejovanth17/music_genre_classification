@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classification Results - Music Genre AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 50px;
+    color: #334155;
+    line-height: 1.6;
+">
+    
+    <!-- Header -->
+    <div style="
+        background: #1e293b;
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+        box-shadow: 0 4px 20px rgba(30, 41, 59, 0.15);
+        animation: slideInDown 0.8s ease-out;
+    ">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <h1 style="
+                        font-size: 2.5rem;
+                        font-weight: 700;
+                        margin-bottom: 1rem;
+                        color: white;
+                    ">
+                        <i class="fas fa-chart-line" style="color: #2563eb; margin-right: 10px;"></i>
+                        Classification Results
+                    </h1>
+                    <p style="
+                        font-size: 1.2rem;
+                        color: #cbd5e1;
+                        margin: 0;
+                        font-weight: 300;
+                    ">Your music has been analyzed and classified with AI precision</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Main Result Card -->
+        <div style="
+            background: white;
+            border-radius: 16px;
+            padding: 50px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            margin-bottom: 40px;
+            animation: scaleIn 0.8s ease-out 0.2s both;
+            position: relative;
+            overflow: hidden;
+        ">
+            <!-- Top accent border -->
+            <div style="
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: #2563eb;
+            "></div>
+            
+            <div class="row align-items-center">
+                <div class="col-md-8 text-center text-md-start">
+                    <h3 style="
+                        color: #64748b;
+                        margin-bottom: 20px;
+                        font-weight: 500;
+                        font-size: 1.1rem;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                    ">
+                        <i class="fas fa-music" style="color: #2563eb; margin-right: 8px;"></i>
+                        Predicted Genre
+                    </h3>
+                    <div style="
+                        font-size: 3.5rem;
+                        font-weight: 700;
+                        color: #1e293b;
+                        margin: 25px 0;
+                        text-shadow: none;
+                        animation: pulse 2s infinite;
+                    ">
+                        {% set genre_emojis = {
+                            'blues': '🎵',
+                            'classical': '🎼',
+                            'country': '🤠',
+                            'disco': '🕺',
+                            'hiphop': '🎤',
+                            'jazz': '🎷',
+                            'metal': '🤘',
+                            'pop': '🎤',
+                            'reggae': '🏝️',
+                            'rock': '🎸'
+                        } %}
+                        <span style="
+                            font-size: 3rem;
+                            margin-right: 15px;
+                            vertical-align: middle;
+                        ">{{ genre_emojis[predicted_genre.lower()] or '🎵' }}</span>
+                        {{ predicted_genre.title() }}
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <span style="
+                            background: #2563eb;
+                            color: white;
+                            padding: 12px 24px;
+                            border-radius: 8px;
+                            font-weight: 500;
+                            font-size: 0.95rem;
+                            display: inline-block;
+                        ">
+                            <i class="fas fa-file-audio" style="margin-right: 8px;"></i>
+                            {{ filename }}
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div style="
+                        position: relative;
+                        width: 140px;
+                        height: 140px;
+                        margin: 20px auto;
+                    ">
+                        <svg style="
+                            transform: rotate(-90deg);
+                            width: 100%;
+                            height: 100%;
+                        ">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#059669;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle cx="70" cy="70" r="60" style="
+                                fill: none;
+                                stroke: #e2e8f0;
+                                stroke-width: 10;
+                                stroke-linecap: round;
+                            "></circle>
+                            <circle cx="70" cy="70" r="60" style="
+                                fill: none;
+                                stroke: url(#gradient);
+                                stroke-width: 10;
+                                stroke-linecap: round;
+                                stroke-dasharray: 377;
+                                stroke-dashoffset: calc(377 - (377 * {{ confidence }}) / 100);
+                                animation: drawCircle 2s ease-out forwards;
+                            "></circle>
+                        </svg>
+                        <div style="
+                            position: absolute;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            font-size: 1.8rem;
+                            font-weight: 700;
+                            color: #1e293b;
+                            text-align: center;
+                        ">
+                            {{ "%.1f"|format(confidence) }}%
+                            <div style="
+                                font-size: 0.8rem;
+                                color: #64748b;
+                                font-weight: 400;
+                                margin-top: 5px;
+                            ">Confidence</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        ">
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e2e8f0;
+                transition: all 0.3s ease;
+                animation: fadeInUp 0.6s ease-out both;
+            " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.06)'">
+                <div style="
+                    font-size: 2.5rem;
+                    color: #2563eb;
+                    margin-bottom: 15px;
+                "><i class="fas fa-bullseye"></i></div>
+                <div style="
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 5px;
+                ">{{ "%.1f"|format(confidence) }}%</div>
+                <div style="
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                ">Confidence Score</div>
+            </div>
+            
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e2e8f0;
+                transition: all 0.3s ease;
+                animation: fadeInUp 0.6s ease-out 0.1s both;
+            " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.06)'">
+                <div style="
+                    font-size: 2.5rem;
+                    color: #059669;
+                    margin-bottom: 15px;
+                "><i class="fas fa-layer-group"></i></div>
+                <div style="
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 5px;
+                ">{{ all_predictions|length }}</div>
+                <div style="
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                ">Genres Analyzed</div>
+            </div>
+            
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e2e8f0;
+                transition: all 0.3s ease;
+                animation: fadeInUp 0.6s ease-out 0.2s both;
+            " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.06)'">
+                <div style="
+                    font-size: 2.5rem;
+                    color: #7c3aed;
+                    margin-bottom: 15px;
+                "><i class="fas fa-brain"></i></div>
+                <div style="
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 5px;
+                ">CNN</div>
+                <div style="
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                ">AI Model Used</div>
+            </div>
+            
+            <div style="
+                background: white;
+                padding: 30px;
+                border-radius: 12px;
+                text-align: center;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+                border: 1px solid #e2e8f0;
+                transition: all 0.3s ease;
+                animation: fadeInUp 0.6s ease-out 0.3s both;
+            " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 20px rgba(0, 0, 0, 0.06)'">
+                <div style="
+                    font-size: 2.5rem;
+                    color: #dc2626;
+                    margin-bottom: 15px;
+                "><i class="fas fa-clock"></i></div>
+                <div style="
+                    font-size: 2rem;
+                    font-weight: 700;
+                    color: #1e293b;
+                    margin-bottom: 5px;
+                ">< 5s</div>
+                <div style="
+                    color: #64748b;
+                    font-size: 0.95rem;
+                    font-weight: 500;
+                ">Processing Time</div>
+            </div>
+        </div>
+        
+        <!-- Detailed Results -->
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+                    border: 1px solid #e2e8f0;
+                    transition: all 0.3s ease;
+                    animation: fadeInUp 0.8s ease-out 0.4s both;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 40px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.08)'">
+                    <div style="
+                        background: #2563eb;
+                        color: white;
+                        padding: 20px;
+                        border: none;
+                    ">
+                        <h5 style="
+                            margin: 0;
+                            font-weight: 600;
+                            font-size: 1.1rem;
+                        ">
+                            <i class="fas fa-chart-bar" style="margin-right: 10px;"></i>
+                            Detailed Predictions
+                        </h5>
+                    </div>
+                    <div style="padding: 0;">
+                        <div style="
+                            max-height: 450px;
+                            overflow-y: auto;
+                        ">
+                            {% for pred in all_predictions[:8] %}
+                            <div style="
+                                padding: 20px;
+                                border-bottom: 1px solid #f1f5f9;
+                                transition: all 0.3s ease;
+                                animation: slideInLeft 0.6s ease-out {{ loop.index * 0.1 }}s both;
+                                display: flex;
+                                align-items: center;
+                            " onmouseover="this.style.background='#f8fafc'; this.style.transform='translateX(5px)'" onmouseout="this.style.background='transparent'; this.style.transform='translateX(0)'">
+                                <div style="
+                                    width: 45px;
+                                    height: 45px;
+                                    border-radius: 50%;
+                                    background: #{{ loop.index <= 3 and '2563eb' or loop.index <= 6 and '059669' or '64748b' }};
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    color: white;
+                                    font-size: 1.3rem;
+                                    margin-right: 20px;
+                                    flex-shrink: 0;
+                                ">
+                                    {{ genre_emojis[pred.genre.lower()] or '🎵' }}
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <div style="
+                                        display: flex;
+                                        justify-content: space-between;
+                                        align-items: center;
+                                        margin-bottom: 8px;
+                                    ">
+                                        <span style="
+                                            font-weight: 600;
+                                            color: #1e293b;
+                                            font-size: 1rem;
+                                        ">{{ pred.genre.title() }}</span>
+                                        <span style="
+                                            background: #64748b;
+                                            color: white;
+                                            padding: 4px 12px;
+                                            border-radius: 6px;
+                                            font-size: 0.85rem;
+                                            font-weight: 500;
+                                        ">{{ "%.1f"|format(pred.confidence) }}%</span>
+                                    </div>
+                                    <div style="
+                                        height: 8px;
+                                        border-radius: 4px;
+                                        background: #e2e8f0;
+                                        overflow: hidden;
+                                    ">
+                                        <div style="
+                                            height: 100%;
+                                            background: #{{ loop.index <= 3 and '2563eb' or loop.index <= 6 and '059669' or '64748b' }};
+                                            border-radius: 4px;
+                                            width: {{ pred.confidence }}%;
+                                            transition: width 1.5s ease-out;
+                                        "></div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <!-- Audio Analysis Visualization -->
+                {% if visualization_path %}
+                <div style="
+                    background: white;
+                    border-radius: 16px;
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+                    border: 1px solid #e2e8f0;
+                    transition: all 0.3s ease;
+                    animation: fadeInUp 0.8s ease-out 0.6s both;
+                    overflow: hidden;
+                " onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 40px rgba(0, 0, 0, 0.12)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 30px rgba(0, 0, 0, 0.08)'">
+                    <div style="
+                        background: #059669;
+                        color: white;
+                        padding: 20px;
+                    ">
+                        <h5 style="
+                            margin: 0;
+                            font-weight: 600;
+                            font-size: 1.1rem;
+                        ">
+                            <i class="fas fa-wave-square" style="margin-right: 10px;"></i>
+                            Audio Analysis
+                        </h5>
+                    </div>
+                    <div style="padding: 25px;">
+                        <div style="
+                            position: relative;
+                            border-radius: 12px;
+                            overflow: hidden;
+                            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+                        ">
+                            <img src="{{ url_for('static', filename=visualization_path.replace('static/', '')) }}" 
+                                 style="
+                                     width: 100%;
+                                     height: auto;
+                                     border-radius: 12px;
+                                     display: block;
+                                 " alt="Audio Analysis">
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <small style="
+                                color: #64748b;
+                                line-height: 1.6;
+                                display: block;
+                                padding: 15px;
+                                background: #f8fafc;
+                                border-radius: 8px;
+                                border-left: 4px solid #2563eb;
+                            ">
+                                <i class="fas fa-info-circle" style="color: #2563eb; margin-right: 8px;"></i>
+                                This spectrogram shows the frequency content of your audio over time, 
+                                which our AI model uses to identify genre characteristics and make accurate predictions.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            margin-top: 40px;
+            animation: fadeInUp 0.8s ease-out 0.8s both;
+            text-align: center;
+        ">
+            <div class="row justify-content-center">
+                <div class="col-auto">
+                    <a href="{{ url_for('upload_page') }}" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 16px 32px;
+                        border-radius: 12px;
+                        font-weight: 600;
+                        text-transform: none;
+                        letter-spacing: 0.5px;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        overflow: hidden;
+                        background: #2563eb;
+                        color: white;
+                        text-decoration: none;
+                        margin-right: 15px;
+                        border: none;
+                        font-size: 1rem;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(37, 99, 235, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fas fa-upload"></i>
+                        Upload Another File
+                    </a>
+                    <a href="{{ url_for('index') }}" style="
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 10px;
+                        padding: 16px 32px;
+                        border-radius: 12px;
+                        font-weight: 600;
+                        text-transform: none;
+                        letter-spacing: 0.5px;
+                        transition: all 0.3s ease;
+                        position: relative;
+                        overflow: hidden;
+                        background: transparent;
+                        color: #64748b;
+                        text-decoration: none;
+                        border: 2px solid #e2e8f0;
+                        font-size: 1rem;
+                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.borderColor='#2563eb'; this.style.color='#2563eb'" onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='#e2e8f0'; this.style.color='#64748b'">
+                        <i class="fas fa-home"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+            
+            <div style="margin-top: 25px;">
+                <small style="
+                    color: #64748b;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    font-size: 0.9rem;
+                ">
+                    <i class="fas fa-share-alt" style="color: #2563eb;"></i>
+                    Share your results with friends and colleagues!
+                </small>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        @keyframes slideInDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes fadeInUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.95); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes drawCircle {
+            from { stroke-dashoffset: 377; }
+            to { stroke-dashoffset: calc(377 - (377 * {{ confidence }}) / 100); }
+        }
+        
+        @keyframes slideInLeft {
+            from { transform: translateX(-30px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 30px;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+    
+    <script>
+        // Initialize animations and interactions
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate progress bars
+            const progressBars = document.querySelectorAll('[style*="width:"]');
+            progressBars.forEach((bar, index) => {
+                if (bar.style.width && bar.style.width.includes('%')) {
+                    setTimeout(() => {
+                        const width = bar.style.width;
+                        bar.style.width = '0%';
+                        setTimeout(() => {
+                            bar.style.width = width;
+                        }, 100);
+                    }, index * 200);
+                }
+            });
+            
+            // Add ripple effect to buttons
+            document.querySelectorAll('a[href]').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255, 255, 255, 0.3);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+        
+        // Add ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
