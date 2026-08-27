@@ -40,14 +40,17 @@
             <div class="glass-card mb-4">
                 <div class="row align-items-center g-4">
                     <div class="col-lg-7">
-                        <div class="d-flex align-items-center gap-2 mb-3">
-                            <span class="badge-{{ predicted_genre|lower }} genre-badge">
-                                <i class="fas fa-award"></i> Top Prediction
-                            </span>
-                            <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50">
-                                <i class="fas fa-file-audio me-1"></i> {{ filename }}
-                            </span>
-                        </div>
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <span class="badge-{{ predicted_genre|lower }} genre-badge">
+                                    <i class="fas fa-award"></i> Top Prediction
+                                </span>
+                                <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-25">
+                                    <i class="fas fa-crown me-1"></i> SOTA LightGBM (91.19% Acc)
+                                </span>
+                                <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-50">
+                                    <i class="fas fa-file-audio me-1"></i> {{ filename }}
+                                </span>
+                            </div>
 
                         <h1 class="display-4 fw-bold mb-2 text-capitalize" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                             {{ predicted_genre }}

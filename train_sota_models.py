@@ -249,7 +249,7 @@ def run_sota_benchmark():
 
     print("\n📂 Loading 3-Second Granularity Feature Set (9,990 samples)...")
     df = load_feature_data(dataset_dir=dataset_dir, feature_type="3_sec")
-    X_train, X_test, y_train, y_test, _ = prepare_train_test_data(
+    X_train, X_test, y_train, y_test, scaler = prepare_train_test_data(
         df, scale=True, test_size=0.25, random_state=RANDOM_STATE
     )
 
@@ -361,8 +361,17 @@ def run_sota_benchmark():
 
     models_dir = get_output_dir("models")
     import joblib
-    joblib.dump({"model": lgbm_model, "label_encoder": le, "scaler": _}, models_dir / "sota_lightgbm.joblib")
+    import shutil
+    artifact_payload = {
+        "model": lgbm_model,
+        "label_encoder": le,
+        "scaler": scaler,
+        "feature_names": list(X_train.columns)
+    }
+    joblib.dump(artifact_payload, models_dir / "sota_lightgbm.joblib")
+    joblib.dump(artifact_payload, Path("models") / "sota_lightgbm.joblib")
     torch.save(resnet.state_dict(), models_dir / "sota_resnet18.pth")
+    torch.save(resnet.state_dict(), Path("models") / "sota_resnet18.pth")
     torch.save(effnet.state_dict(), models_dir / "sota_efficientnet.pth")
     torch.save(mobilenet.state_dict(), models_dir / "sota_mobilenet.pth")
 
