@@ -2,5 +2,11 @@ Flask
 tensorflow
 librosa
 numpy
+pandas
+scikit-learn
+scipy
+seaborn
 matplotlib
+xgboost
+joblib
 Werkzeug

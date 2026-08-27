@@ -16,6 +16,9 @@ static/waveforms/*.png
 !static/spectrograms/.gitkeep
 !static/waveforms/.gitkeep
 
+# Output artifacts
+outputs/
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
