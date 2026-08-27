@@ -18,6 +18,7 @@ static/waveforms/*.png
 
 # Output artifacts
 outputs/
+*.pt
 
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/

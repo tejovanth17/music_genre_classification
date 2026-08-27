@@ -419,5 +419,9 @@ if __name__ == '__main__':
     os.makedirs('static/spectrograms', exist_ok=True)
     get_recommender()
     
-    logger.info("Application started successfully!")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    host = os.environ.get('HOST', '0.0.0.0')
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() in ['true', '1', 't']
+    
+    logger.info(f"Application serving on http://{host}:{port} (debug={debug})")
+    app.run(debug=debug, host=host, port=port)
